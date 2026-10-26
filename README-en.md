@@ -1,8 +1,10 @@
-# Android TV Kit: make your TV fast and beautiful
+# ProxFibre TV: make your TV fast and beautiful
 
 [🇫🇷 Version française](README.md) · **🇬🇧 English**
 
-Is your Android TV laggy, full of ads, with audio drifting out of sync during movies? This kit slims it down in a few minutes from a Windows PC, a Mac or a Linux PC. It also installs **Zen Home**, a minimalist Apple TV-style home screen.
+<p align="center"><img src="docs/proxFibre-banner.png" alt="ProxFibre" width="760"></p>
+
+Is your Android TV laggy, full of ads, with audio drifting out of sync during movies? This kit slims it down in a few minutes from a Windows PC, a Mac or a Linux PC. It also installs **ProxFibre**, a minimalist Apple TV-style home screen.
 
 <table>
   <tr>
@@ -11,11 +13,11 @@ Is your Android TV laggy, full of ads, with audio drifting out of sync during mo
   </tr>
   <tr>
     <td><img src="docs/avant.jpg" alt="TCL TV before: Google TV home full of ads and apps" width="400"></td>
-    <td><img src="docs/apres.jpg" alt="TCL TV after: Zen Home screen with a landscape photo and a dock" width="400"></td>
+    <td><img src="docs/apres.jpg" alt="TCL TV after: ProxFibre screen with a landscape photo and a dock" width="400"></td>
   </tr>
   <tr>
     <td align="center"><sub>Original home: ads, promo apps, lag</sub></td>
-    <td align="center"><sub>Zen Home: landscape photo, the time and your apps</sub></td>
+    <td align="center"><sub>ProxFibre: landscape photo, the time and your apps</sub></td>
   </tr>
 </table>
 
@@ -34,7 +36,7 @@ Is your Android TV laggy, full of ads, with audio drifting out of sync during mo
 4. [Before using the kit on your TV](#before-using-the-kit-on-your-tv)
 5. [Prepare the TV (5 minutes)](#prepare-the-tv-5-minutes)
 6. [How to use it](#how-to-use-it)
-7. [Customising Zen Home](#customising-zen-home)
+7. [Customising ProxFibre](#customising-proxfibre)
 8. [Safety and undo](#safety-and-undo)
 9. [Troubleshooting](#troubleshooting)
 10. [Folder contents](#folder-contents)
@@ -57,13 +59,13 @@ Is your Android TV laggy, full of ads, with audio drifting out of sync during mo
 |---|---|---|
 | **1. Diagnosis + backup** | Reads the Android version, memory, CPU and Wi-Fi. Backs up the list of apps and settings, with a screenshot. | No |
 | **2. Slim down** | Disables known ads, telemetry and useless services (Google, TCL, Sony, Xiaomi…). For features you may use (Chromecast, Assistant…), the kit asks you first. | Yes, reversible |
-| **3. Zen Home** | Installs the minimalist home screen: your title, a 4, 6 or 8 app layout, and your favourite apps. If you want, it also disables the original home screen, which is often very resource-hungry. | Yes, reversible |
+| **3. ProxFibre** | Installs the minimalist home screen: your title, a 4, 6 or 8 app layout, and your favourite apps. On first start, ProxFibre also offers to install Armadillo (VPN) and AirPlay (iPhone/Mac receiver). If you want, it also disables the original home screen, which is often very resource-hungry. | Yes, reversible |
 | **4. My photos** | Replaces the bundled photos with your own. | Yes, reversible |
 | **5. Screenshot** | Captures what the TV is showing. | No |
-| **6. Restore everything** | Re-enables everything the kit disabled, puts back the original home screen and animations, and uninstalls Zen Home. | Back to original |
+| **6. Restore everything** | Re-enables everything the kit disabled, puts back the original home screen and animations, and uninstalls ProxFibre. | Back to original |
 | **7. Other TV** | Changes the target TV. | No |
 
-**Nothing is ever uninstalled**, except Zen Home if you ask. Apps are only *disabled* and can be turned back on in one click.
+**Nothing is ever uninstalled**, except ProxFibre if you ask. Apps are only *disabled* and can be turned back on in one click.
 
 **Real example** on a 2019 TCL (Android 9, 2 GB RAM):
 
@@ -71,14 +73,14 @@ Is your Android TV laggy, full of ads, with audio drifting out of sync during mo
 |---|---|---|
 | CPU at idle | 61 % | 12 % |
 | Available RAM | 451 MB | 720 MB |
-| Home screen | 187 MB (Google TV) | 25 MB (Zen Home) |
+| Home screen | 187 MB (Google TV) | 25 MB (ProxFibre) |
 | Disabled services (ads, telemetry, bloat) | 0 | 32 |
 
 These figures come from a single TV. Your results will differ.
 
 ## Compatibility
 
-| Device | Slimming | Zen Home |
+| Device | Slimming | ProxFibre |
 |---|---|---|
 | **Android TV / Google TV** sets: TCL, Sony, Philips, Xiaomi, Hisense (Android models), Sharp, Toshiba… | ✅ | ✅ |
 | Boxes: Nvidia Shield, Chromecast with Google TV, Xiaomi Mi Box, Google TV Streamer | ✅ | ✅ |
@@ -129,7 +131,7 @@ Every manufacturer ships its own apps, with names that differ between brands, mo
 **You may need to adapt the kit to your TV.** For example:
 
 - add or remove lines in `scripts/listes/pubs_telemetrie.txt` and `scripts/listes/optionnel.txt`;
-- add your brand's "TV inputs" app to the Zen Home code if it isn't recognised;
+- add your brand's "TV inputs" app to the ProxFibre code if it isn't recognised;
 - tweak a command if your Android version behaves differently.
 
 **Have the kit reviewed before using it.** If you're not comfortable with code, open the kit folder in a coding assistant such as **[Claude Code](https://claude.com/claude-code)** and ask, for example:
@@ -166,7 +168,7 @@ In **Settings → Network & Internet → (your Wi-Fi)**, or **About → Status**
 2. Pick a menu option. The first time, the kit asks for the TV's IP address.
 3. **Look at the TV**: an "Allow USB debugging?" prompt appears. Tick **"Always allow from this computer"**, then **OK**.
 4. The kit shows the brand and model it found. Check it's your TV before confirming.
-5. **Option 3:** while Zen Home installs, Google Play Protect may show a warning on the TV (app installed outside the Play Store). Choose **"Details"** then **"Install anyway"**.
+5. **Option 3:** while ProxFibre installs, Google Play Protect may show a warning on the TV (app installed outside the Play Store). Choose **"Details"** then **"Install anyway"**.
 
 **Recommended order: 1, then 2, then 3.** The kit makes an automatic backup before the first change anyway.
 
@@ -174,22 +176,23 @@ The kit speaks French if the system (Windows, macOS or Linux) is in French, othe
 
 The Windows (`scripts/kit.ps1`) and macOS/Linux (`scripts/kit.sh`) versions do exactly the same thing and share the same lists and the same `sauvegardes/` folder: you can start on one computer and restore from another.
 
-## Customising Zen Home
+## Customising ProxFibre
 
 | What | How |
 |---|---|
 | **Title** ("Living room", "Emma's room"…) | Menu option 3. Type your title, leave it empty to show the TV's name (the one in the Android settings), or type `-` to show nothing. |
-| **Layout** | Option 3: **4 apps** (large tiles), **6 apps** in one row, or **8 apps** in two rows. |
-| **Dock apps** | Option 3: the kit lists the streaming apps it found; pick the numbers in the order you want. Without a choice, Zen Home automatically picks the first ones among Netflix, YouTube, Prime Video, Disney+, myCANAL, Max, Apple TV… |
+| **Layout** | Option 3: **4**, **6** or **8 apps**, all in a single row with the shortcuts; tiles shrink when there are more. |
+| **Dock apps** | Option 3: the kit lists the streaming apps it found; pick the numbers in the order you want. Without a choice, ProxFibre automatically picks the first ones among Netflix, YouTube, Prime Video, Disney+, myCANAL, Max, Apple TV… |
 | **Your photos** | Copy your `.jpg` files (landscape, ideally 1920×1080) into the **`mes_photos`** folder, then run option 4. To go back to the bundled photos, empty the folder and run option 4 again. |
 | **Rotation speed** | Option 4: number of seconds between photos (60 by default). |
 | **What gets disabled** | Edit `scripts/listes/pubs_telemetrie.txt` (disabled after a single confirmation) and `scripts/listes/optionnel.txt` (the kit asks for each line). One line = `package.name | French description | English description`. To group several packages of one feature under a single question: `package1,package2 | ... | ...`. |
 
-With the remote, in Zen Home:
+With the remote, in ProxFibre:
 
 - **Arrows and OK** to open an app.
 - **All apps** to see every installed app.
 - **TV inputs** for channels and HDMI ports, if the brand is recognised.
+- **Down arrow** from the dock opens the **Top Shelf**: rows of apps by theme, below the dock. **Up arrow** on the first row closes it.
 
 ### Edit the home screen right on the TV
 
@@ -200,19 +203,37 @@ No PC needed to change the dock. On a dock app, **long-press OK** (or press the 
 | **Move** | The app gets a blue outline: move it with the arrows, then press **OK** to confirm. |
 | **Replace with another app** | Opens your app list: the one you pick takes its place. |
 | **Remove from dock** | Takes the app off the dock (it stays installed). |
-| **Add an app** | When there's room left. The dock's **+** tile does the same. |
+| **Add an app** | When there's room left. The dock's **+** does the same. |
 | **Layout** | Switches to the 4, 6 or 8 app layout. |
 | **Change the title** | Your own text, empty for the TV's name, or "No title". |
+| **Top Shelf sections** | Rename a section, add or remove apps, create one ("Streaming", "Movies & shows", "Music", "Games"… or a custom name), or delete it. Long-pressing an app in the Top Shelf removes it from its section. |
 
 In **All apps**, long-pressing an app also lets you **add it to the dock**.
 
 These settings are saved on the TV. If you run the kit's option 3 again later, the choices made in the kit take over.
 
+### Wi-Fi, VPN and AirPlay
+
+Four icons in the top-right corner show the TV's state:
+
+- **Wi-Fi**: white when the TV has Internet (Wi-Fi or Ethernet), grey with a slash otherwise. The number of arcs follows the signal strength when it is known.
+- **VPN**: white shield at rest, **blue** as soon as a VPN tunnel is active (Armadillo or any other VPN app).
+- **AirPlay**: AirPlay icon, dimmed while the receiver is stopped, white while it waits for a device, and white with a green dot while an iPhone or Mac is casting. Pressing **OK** on it opens AirPlay, or starts the receiver when it is stopped. The same state, in words, is shown in **Control Center** and in Settings → Bundled apps; a notification appears when a device connects and when it leaves.
+- **Settings**: the gear opens the TV's Android settings. It replaces the "Settings" tile that used to sit on the right of the dock.
+
+In the top-left corner, the time and date, then the TV's name (or your title) underneath, smaller.
+
+Two apps ship with ProxFibre: **Armadillo** (VPN client) and **AirPlay Server** (iPhone, iPad and Mac receiver, open source). On first start, the home screen offers to install them one after the other; Android asks for one confirmation per app. They then show up in **All apps**, and ProxFibre's menu (long-press OK) opens or reinstalls them.
+
+**AirPlay starts on its own every time the TV boots** and stays visible from the iPhone or Mac as "Android AirPlay" (renameable in the app). To start it right after installing, open it from **All apps** or from the menu.
+
+If Android refuses the install, ProxFibre opens the "Install unknown apps" screen: allow it for ProxFibre, come back, and the install resumes on its own. The **Install Armadillo** and **Install AirPlay** entries stay in the menu even after choosing "Later". If you uninstall ProxFibre later, both apps stay installed: remove them from the TV's Android settings.
+
 ## Safety and undo
 
 - **Identity lock.** The kit records your TV's serial number. Before every action, it checks that the device at that address is the same one. Another TV, a box or a Fire Stick that gets that IP will never be modified.
 - **Protected apps.** Play Store, Google services, settings, keyboard, WebView… are never disabled, even if added to a list.
-- **Option 2 never turns off the current home screen.** Only option 3 can disable it, once Zen Home is installed.
+- **Option 2 never turns off the current home screen.** Only option 3 can disable it, once ProxFibre is installed.
 - **Backups and screenshots.** Everything is stored in `sauvegardes/<TV-serial-number>/`, with a log of each session.
 - **Undo:** option 6. If the PC isn't available anymore, on the TV: **Settings → Apps → See all apps → Show system apps →** pick the app → **Enable**.
 - **TV system updates** stay enabled. After a big update, some apps may be re-enabled: just run option 2 again. This happens often on Fire TV.
@@ -227,12 +248,12 @@ As a last resort, a factory reset always brings the TV back to new. It also eras
 | "Could not connect" | Make sure the TV is on (not in standby), on the same network as the PC, and that **USB debugging** is enabled. Double-check the IP address. |
 | No "Allow debugging" prompt | Turn USB debugging off and on again, then restart the kit. Some TVs also need **Network ADB debugging**. |
 | Android 11 or newer TV with a "Wireless debugging" screen | Choose "Pair with code" on the TV. When the kit offers it, answer **yes** and type the IP:port and code shown. |
-| Long-pressing OK does nothing | Hold OK for at least half a second: Zen Home also recognises remotes that send a long press as a burst of short presses (Sony, for example). Otherwise, use the **Menu** (or ☰) key on the app. |
-| Zen Home "Install failed" | The TV probably showed a Google Play Protect warning that went unanswered. Run option 3 again and, on the TV, choose **"Details"** then **"Install anyway"**. |
-| The Home button doesn't show Zen Home | Press Home: if a chooser appears, pick **Zen Home** then **Always**. Otherwise run option 3 again and accept disabling the original home screen. |
+| Long-pressing OK does nothing | Hold OK for at least half a second: ProxFibre also recognises remotes that send a long press as a burst of short presses (Sony, for example). Otherwise, use the **Menu** (or ☰) key on the app. |
+| ProxFibre "Install failed" | The TV probably showed a Google Play Protect warning that went unanswered. Run option 3 again and, on the TV, choose **"Details"** then **"Install anyway"**. |
+| The Home button doesn't show ProxFibre | Press Home: if a chooser appears, pick **ProxFibre** then **Always**. Otherwise run option 3 again and accept disabling the original home screen. |
 | The remote's Source button no longer works | On some TVs (especially Google TV), the original home screen handles this button. Run option 6 to re-enable it, then run option 3 again and answer **no** when the kit offers to disable it. |
-| Google TV logo looping after option 3 | A Google fallback screen took the home screen's place. Press Home and pick **Zen Home** then **Always**. Otherwise, run option 6 from the PC, restart the TV, then run option 3 again with the latest version of the kit. |
-| The old home screen comes back (Google TV) | On Google TV, the original home screen can re-enable itself a few minutes after option 3, or after an update. Zen Home usually stays the home screen (option 1 reports what was re-enabled). If the old one takes over, run option 3 again. |
+| Google TV logo looping after option 3 | A Google fallback screen took the home screen's place. Press Home and pick **ProxFibre** then **Always**. Otherwise, run option 6 from the PC, restart the TV, then run option 3 again with the latest version of the kit. |
+| The old home screen comes back (Google TV) | On Google TV, the original home screen can re-enable itself a few minutes after option 3, or after an update. ProxFibre usually stays the home screen (option 1 reports what was re-enabled). If the old one takes over, run option 3 again. |
 | No "TV inputs" tile | The brand isn't recognised: use the remote's Source or Input button, or add your brand to the code (see [Before using the kit](#before-using-the-kit-on-your-tv)). |
 | "skipped (cannot be changed on this TV)" is shown | That's normal: the TV protects this package or doesn't have it. Nothing was changed for it. |
 | A TV feature stopped working | Run option 6 to restore everything, then run option 2 again and answer "yes" for that feature. |
@@ -244,7 +265,7 @@ As a last resort, a factory reset always brings the TV back to new. It also eras
 ## Folder contents
 
 ```
-Kit-TV-Android/
+ProxFibre-TV/
 ├── LANCER.bat              ← Windows: double-click here
 ├── LANCER.command          ← macOS: double-click here
 ├── LANCER.sh               ← Linux: ./LANCER.sh
@@ -257,15 +278,28 @@ Kit-TV-Android/
 │   ├── kit.sh              ← the same program (bash, macOS/Linux)
 │   └── listes/             ← what gets disabled (editable)
 ├── ecran-accueil/
-│   ├── ZenHome.apk         ← the ready-to-install home screen
+│   ├── ProxFibre.apk       ← the ready-to-install home screen
 │   └── source/             ← Java source code + build script
-├── mes_photos/             ← your photos for Zen Home (option 4)
+├── mes_photos/             ← your photos for ProxFibre (option 4)
 ├── outils/                 ← ADB, downloaded automatically
 └── sauvegardes/            ← created automatically: one backup per TV
 ```
 
 > [!NOTE]
 > If you share the kit, don't share `sauvegardes/`, `outils/` or `config_tv.json`: they contain information about your TV.
+
+### Building ProxFibre yourself
+
+The launcher (`hume/`) builds without Gradle, with JDK 17+ and the Android SDK (build-tools 34/35, platform 34): `hume/build-win.sh` on Windows (Git Bash), `hume/build.sh` on macOS and Linux. The APK lands in `hume/build/ProxFibre.apk`.
+
+The two receivers bundled with ProxFibre are not versioned here (third-party binaries, 80 MB together). To build the complete APK, drop them in before running the script:
+
+- `ecran-accueil/source/assets/armadillo/armadillo.apk` — [Kazuryy/armadillo-android](https://github.com/Kazuryy/armadillo-android/releases), AGPL v3;
+- `ecran-accueil/source/assets/airplay/airplay.apk` — [jqssun/android-airplay-server](https://github.com/jqssun/android-airplay-server/releases), GPL v3.
+
+Without them the APK still builds and the launcher works, but installing Armadillo or AirPlay from ProxFibre fails (the files are missing from the package).
+
+ProxFibre's update check reads the **GitHub releases** of this repository (`ProxFibre/ProxFibre-TV`): publishing a release with an `.apk` attached is all it takes to offer the update on the TV, without touching the app.
 
 ## Disclaimer
 
@@ -281,9 +315,10 @@ The kit is not affiliated with or endorsed by Google, TCL, Sony, Philips, Xiaomi
 
 - **Photos:** 19 Wikimedia Commons "Featured pictures", CC BY-SA licensed. Authors and links are in [CREDITS.md](CREDITS.md).
 - **Slimming lists:** built from [Universal Android Debloater NG](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation), [CleanYourTV](https://github.com/Gathin23/cleanyourtv), [shield_optimizer](https://github.com/bryanroscoe/shield_optimizer), [dumbtv](https://github.com/humblemuzzu/dumbtv) and community guides. Thanks to their authors.
+- **Armadillo (VPN):** [Kazuryy/armadillo-android](https://github.com/Kazuryy/armadillo-android) v0.2.0, GNU AGPL v3, bundled unmodified in the ProxFibre APK. Details in [CREDITS.md](CREDITS.md).
 - **Font:** Poppins, SIL Open Font License.
 - **ADB:** Google's Android SDK Platform-Tools, downloaded from the official site on first launch.
-- **Kit and Zen Home code:** MIT license, see [LICENSE](LICENSE). You can use, modify and share it freely.
+- **Kit and ProxFibre code:** MIT license, see [LICENSE](LICENSE). You can use, modify and share it freely.
 
 ---
 

@@ -1,0 +1,8 @@
+build/
+signing.keystore
+debug.keystore
+*.jks
+keystore-password.txt
+ProxFibre.apk
+shots-tmp/
+.DS_Store

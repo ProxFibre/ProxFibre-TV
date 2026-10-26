@@ -1,0 +1,19 @@
+ProxFibre Launcher
+Based on Hume Launcher, Copyright 2026 Petrobot
+https://github.com/petrobot-admin/hume-launcher
+
+Licensed under the Apache License, Version 2.0 (see LICENSE). The original copyright notice above
+is retained as required by that licence. Changes for ProxFibre: application name and package
+(com.proxfibre.launcher), ProxFibre icon and banner, Armadillo and AirPlay Server
+bundled inside the APK, and a French/English/Spanish interface (French by default).
+
+This product includes third-party components under their own licences:
+
+- Inter typeface — Copyright the Inter Project Authors — SIL Open Font License 1.1
+  (assets/fonts/Inter-LICENSE.txt)
+- QR Code generator library (Java) — Copyright (c) Project Nayuki — MIT License
+  (src/io/nayuki/qrcodegen)
+- Armadillo (VPN) — Copyright Kazuryy — GNU AGPL v3, supplied unmodified inside the APK
+  (assets/armadillo, source: https://github.com/Kazuryy/armadillo-android)
+- AirPlay Server — Copyright jqssun — GNU GPL v3, supplied unmodified inside the APK
+  (assets/airplay, source: https://github.com/jqssun/android-airplay-server)

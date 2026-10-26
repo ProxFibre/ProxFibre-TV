@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="tv.zenhome" android:versionCode="5" android:versionName="2.3">
+    package="tv.proxfibre" android:versionCode="11" android:versionName="2.9">
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="24" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-    <application android:label="Zen Home" android:icon="@drawable/icon"
+    <application android:label="ProxFibre" android:icon="@drawable/icon"
         android:banner="@drawable/banner" android:allowBackup="false"
         android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
         <activity android:name=".Home" android:launchMode="singleTask" android:stateNotNeeded="true"
@@ -20,5 +22,7 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider android:name=".ApkProvider" android:authorities="tv.proxfibre.apks"
+            android:exported="false" android:grantUriPermissions="true" />
     </application>
 </manifest>

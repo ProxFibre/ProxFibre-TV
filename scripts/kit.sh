@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =====================================================================
-#  Kit TV Android - allègement réversible + écran d'accueil Zen Home
-#  Android TV slimming kit - reversible debloat + Zen Home launcher
+#  ProxFibre TV - allègement réversible + écran d'accueil
+#  ProxFibre TV - reversible debloat + launcher
 #  macOS / Linux (bash 3.2+)  -  lancé par LANCER.command ou LANCER.sh
 #  Portage de kit.ps1 : mêmes listes, mêmes fichiers de sauvegarde.
 # =====================================================================
@@ -9,10 +9,10 @@ KIT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS="$KIT/scripts"
 TOOLS="$KIT/outils"
 SAVES="$KIT/sauvegardes"
-APK_PATH="$KIT/ecran-accueil/ZenHome.apk"
+APK_PATH="$KIT/ecran-accueil/ProxFibre.apk"
 PHOTOS_DIR="$KIT/mes_photos"
 CONF_FILE="$KIT/config_tv.json"
-ZEN_PKG="tv.zenhome"
+ZEN_PKG="tv.proxfibre"
 GTV_FALLBACK="com.google.android.tungsten.setupwraith"   # accueil de secours de Google TV
 mkdir -p "$TOOLS" "$SAVES"
 
@@ -452,7 +452,7 @@ DOCK_NAMES=("Netflix" "YouTube" "Prime Video"
 # Android 10+ : l'accueil par défaut est un « rôle » système, en plus de set-home-activity
 Set_HomeRole() { [ "${INFO_Sdk:-0}" -ge 29 ] 2>/dev/null && Sh "cmd role add-role-holder android.app.role.HOME $1" >/dev/null; return 0; }
 
-# Désactive l'accueil d'origine (et l'écran de secours Google TV), puis vérifie que Zen Home a bien pris la place.
+# Désactive l'accueil d'origine (et l'écran de secours Google TV), puis vérifie que ProxFibre a bien pris la place.
 # Si la TV n'a plus d'accueil utilisable, tout est réactivé aussitôt : la TV ne peut pas rester sans accueil.
 Disable_OrigHome() {
     local orig="$1" toOff q
@@ -466,7 +466,7 @@ Disable_OrigHome() {
     Sh "input keyevent KEYCODE_HOME" >/dev/null
     sleep 5
     case "$(Get_Home)" in "$ZEN_PKG"/*) return 0 ;; esac
-    Err "La TV n'accepte pas Zen Home sans son accueil d'origine : réactivation immédiate, rien n'est perdu." "The TV won't accept Zen Home without its original home screen: re-enabling it now, nothing is lost."
+    Err "La TV n'accepte pas ProxFibre sans son accueil d'origine : réactivation immédiate, rien n'est perdu." "The TV won't accept ProxFibre without its original home screen: re-enabling it now, nothing is lost."
     for q in $toOff; do Sh "pm enable $q" >/dev/null; done
     Get_State
     for q in $toOff; do ST_DISABLED="$(printf '%s\n' "$ST_DISABLED" | grep -vxF -- "$q")"; done
@@ -481,7 +481,7 @@ Do_Launcher() {
         Err "Fire TV : Amazon bloque le remplacement de l'écran d'accueil. Utilisez seulement l'allègement (menu 2)." "Fire TV: Amazon blocks replacing the home screen. Use slimming only (menu 2)."
         return ;;
     esac
-    if [ ! -f "$APK_PATH" ]; then Err "ZenHome.apk introuvable dans ecran-accueil/" "ZenHome.apk not found in ecran-accueil/"; return; fi
+    if [ ! -f "$APK_PATH" ]; then Err "ProxFibre.apk introuvable dans ecran-accueil/" "ProxFibre.apk not found in ecran-accueil/"; return; fi
     Ensure_Backup
     Get_State
     curHome="$(Get_Home)"
@@ -528,7 +528,7 @@ Do_Launcher() {
     fi
     Say "   Vous pourrez tout changer ensuite directement sur la TV (appui long sur OK)." "   You can change everything later right on the TV (long-press OK)." DarkGray
 
-    Say "Installation de Zen Home..." "Installing Zen Home..." Cyan
+    Say "Installation de ProxFibre..." "Installing ProxFibre..." Cyan
     Say ">>> Regardez la TV : si Google Play Protect affiche un avertissement, choisissez « Détails » puis « Installer quand même »." ">>> Look at the TV: if Google Play Protect shows a warning, choose 'Details' then 'Install anyway'." Cyan
     r="$(A install -r "$APK_PATH" | tr '\n' ' ')"
     case "$r" in *Success*) ;; *) Err "Échec de l'installation : $r" "Install failed: $r"; Say "   Si la TV a affiché un avertissement Play Protect, relancez l'option 3 et choisissez « Détails » puis « Installer quand même »." "   If the TV showed a Play Protect warning, run option 3 again and choose 'Details' then 'Install anyway'." DarkGray; return ;; esac
@@ -552,7 +552,7 @@ Do_Launcher() {
     echo
     case "$nowHome" in
         "$ZEN_PKG"/*)
-            Ok "Zen Home est l'écran d'accueil." "Zen Home is the home screen."
+            Ok "ProxFibre est l'écran d'accueil." "ProxFibre is the home screen."
             if [ $hasOrig = 1 ]; then
                 Say "L'écran d'accueil d'origine ($origPkg) tourne souvent en fond et consomme beaucoup." "The original home screen ($origPkg) often runs in the background and uses a lot of resources." White
                 Warn "Sur certaines TV (surtout Google TV), la touche Source de la télécommande ne marche plus dans les applis une fois l'accueil d'origine désactivé. L'option 6 remet tout." "On some TVs (especially Google TV), the remote's Source button stops working inside apps once the original home screen is disabled. Option 6 puts everything back."
@@ -561,14 +561,14 @@ Do_Launcher() {
         *)
             if [ $hasOrig = 1 ]; then
                 # Google TV et d'autres refusent un autre accueil tant que le leur est actif : seule solution, le désactiver
-                Warn "La TV garde son accueil d'origine ($origPkg) et refuse Zen Home tant qu'il est actif (fréquent sur Google TV)." "The TV keeps its original home screen ($origPkg) and refuses Zen Home while it is active (common on Google TV)."
-                Say "Le kit peut le désactiver pour forcer Zen Home. Il vérifie ensuite que la TV accepte Zen Home, et réactive tout de suite l'accueil d'origine sinon." "The kit can disable it to force Zen Home. It then checks that the TV accepts Zen Home, and re-enables the original home screen right away otherwise." White
+                Warn "La TV garde son accueil d'origine ($origPkg) et refuse ProxFibre tant qu'il est actif (fréquent sur Google TV)." "The TV keeps its original home screen ($origPkg) and refuses ProxFibre while it is active (common on Google TV)."
+                Say "Le kit peut le désactiver pour forcer ProxFibre. Il vérifie ensuite que la TV accepte ProxFibre, et réactive tout de suite l'accueil d'origine sinon." "The kit can disable it to force ProxFibre. It then checks that the TV accepts ProxFibre, and re-enables the original home screen right away otherwise." White
                 Warn "Sur certaines TV (surtout Google TV), la touche Source de la télécommande ne marche plus dans les applis une fois l'accueil d'origine désactivé. L'option 6 remet tout." "On some TVs (especially Google TV), the remote's Source button stops working inside apps once the original home screen is disabled. Option 6 puts everything back."
-                if YesNo "Forcer Zen Home (réversible) ?" "Force Zen Home (reversible)?" 1; then
-                    Disable_OrigHome "$origPkg" && Ok "Zen Home est l'écran d'accueil." "Zen Home is the home screen."
-                else Say "Rien n'a été désactivé. Zen Home reste disponible dans « Toutes les applis »." "Nothing was disabled. Zen Home stays available in 'All apps'." DarkGray; fi
+                if YesNo "Forcer ProxFibre (réversible) ?" "Force ProxFibre (reversible)?" 1; then
+                    Disable_OrigHome "$origPkg" && Ok "ProxFibre est l'écran d'accueil." "ProxFibre is the home screen."
+                else Say "Rien n'a été désactivé. ProxFibre reste disponible dans « Toutes les applis »." "Nothing was disabled. ProxFibre stays available in 'All apps'." DarkGray; fi
             else
-                Warn "La TV n'a pas confirmé Zen Home par défaut ($nowHome). Appuyez sur la touche Accueil : si un choix s'affiche, prenez « Zen Home » puis « Toujours »." "The TV did not confirm Zen Home as default ($nowHome). Press Home: if a chooser appears, pick 'Zen Home' then 'Always'."
+                Warn "La TV n'a pas confirmé ProxFibre par défaut ($nowHome). Appuyez sur la touche Accueil : si un choix s'affiche, prenez « ProxFibre » puis « Toujours »." "The TV did not confirm ProxFibre as default ($nowHome). Press Home: if a chooser appears, pick 'ProxFibre' then 'Always'."
             fi ;;
     esac
     Capture_TV "zen_home"
@@ -590,7 +590,7 @@ Do_Photos() {
     Say "Dossier de vos photos : $PHOTOS_DIR" "Your photos folder: $PHOTOS_DIR" White
     if [ ${#files[@]} -eq 0 ]; then
         Warn "Aucune photo dedans. Copiez-y des .jpg (paysage, 1920×1080 idéalement) puis revenez ici." "No photos in it. Copy .jpg files there (landscape, ideally 1920×1080) then come back."
-        if YesNo "Revenir aux photos fournies avec Zen Home ?" "Go back to the photos bundled with Zen Home?" 0; then
+        if YesNo "Revenir aux photos fournies avec ProxFibre ?" "Go back to the photos bundled with ProxFibre?" 0; then
             Sh "rm -rf /sdcard/ZenHome" >/dev/null; Sh "am force-stop $ZEN_PKG" >/dev/null; Sh "input keyevent KEYCODE_HOME" >/dev/null
             Ok "Photos d'origine rétablies." "Bundled photos restored."
         fi
@@ -634,7 +634,7 @@ Do_Restore() {
     fi
     case "$ST_ORIGINAL_HOME" in ""|"$ZEN_PKG"/*) ;; *) Sh "cmd package set-home-activity $ST_ORIGINAL_HOME" >/dev/null; Set_HomeRole "${ST_ORIGINAL_HOME%%/*}"; Ok "Écran d'accueil : $ST_ORIGINAL_HOME" "Home screen: $ST_ORIGINAL_HOME" ;; esac
     if in_list "$ZEN_PKG" "$(Get_Packages "")"; then
-        if YesNo "Désinstaller Zen Home ?" "Uninstall Zen Home?" 1; then A uninstall "$ZEN_PKG" >/dev/null; Ok "Zen Home désinstallé" "Zen Home uninstalled"; fi
+        if YesNo "Désinstaller ProxFibre ?" "Uninstall ProxFibre?" 1; then A uninstall "$ZEN_PKG" >/dev/null; Ok "ProxFibre désinstallé" "ProxFibre uninstalled"; fi
         for k in zenhome_title_b64 zenhome_title_mode zenhome_layout zenhome_dock zenhome_rev zenhome_interval; do Sh "settings delete global $k" >/dev/null; done
         Sh "rm -rf /sdcard/ZenHome" >/dev/null
     fi
@@ -662,14 +662,14 @@ Run_Choice() {
 while true; do
     clear
     printf '%s  ╔══════════════════════════════════════════════╗%s\n' "$C_DarkCyan" "$C_0"
-    printf '%s  ║   %s  ║%s\n' "$C_DarkCyan" "$(T "Kit TV Android - allègement + Zen Home   " "Android TV kit - slimming + Zen Home      ")" "$C_0"
+    printf '%s  ║   %s  ║%s\n' "$C_DarkCyan" "$(T "ProxFibre TV - allègement + accueil      " "ProxFibre TV - slimming + launcher       ")" "$C_0"
     printf '%s  ╚══════════════════════════════════════════════╝%s\n' "$C_DarkCyan" "$C_0"
     if [ -f "$CONF_FILE" ]; then printf '%s   TV : %s  (%s)%s\n' "$C_Gray" "$(json_str "$CONF_FILE" label)" "$(json_str "$CONF_FILE" target)" "$C_0"
     else Say "   Aucune TV choisie" "   No TV selected" DarkGray; fi
     echo
     echo "   1. $(T "Diagnostic + sauvegarde (ne modifie rien)" "Diagnosis + backup (changes nothing)")"
     echo "   2. $(T "Alléger : pubs, télémétrie, applis inutiles" "Slim down: ads, telemetry, useless apps")"
-    echo "   3. $(T "Installer l'écran d'accueil Zen Home" "Install the Zen Home launcher")"
+    echo "   3. $(T "Installer l'écran d'accueil ProxFibre" "Install the ProxFibre launcher")"
     echo "   4. $(T "Mettre mes propres photos" "Use my own photos")"
     echo "   5. $(T "Capture d'écran de la TV" "Take a TV screenshot")"
     echo "   6. $(T "Tout restaurer comme avant" "Restore everything as before")"

@@ -1,3 +1,17 @@
 sauvegardes/
 outils/
 config_tv.json
+key.jks
+ecran-accueil/source/out/
+hume/build/
+hume/assets/armadillo/
+hume/assets/airplay/
+hume/ProxFibre.apk
+hume/shots-tmp/
+# Third-party receivers bundled at build time, fetched separately (see README, "Build")
+ecran-accueil/source/assets/armadillo/
+ecran-accueil/source/assets/airplay/
+# Local noise
+.DS_Store
+Thumbs.db
+*.log

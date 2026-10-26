@@ -1,8 +1,8 @@
 # Crédits photos / Photo credits
 
-Les 19 photos fournies avec Zen Home viennent de Wikimedia Commons (« Featured pictures »). Elles ont été recadrées en 16:9 et redimensionnées en 1920×1080. Chacune reste sous sa licence d'origine.
+Les 19 photos fournies avec ProxFibre viennent de Wikimedia Commons (« Featured pictures »). Elles ont été recadrées en 16:9 et redimensionnées en 1920×1080. Chacune reste sous sa licence d'origine.
 
-The 19 photos bundled with Zen Home come from Wikimedia Commons ("Featured pictures"). They were cropped to 16:9 and resized to 1920×1080. Each one keeps its original license.
+The 19 photos bundled with ProxFibre come from Wikimedia Commons ("Featured pictures"). They were cropped to 16:9 and resized to 1920×1080. Each one keeps its original license.
 
 | Fichier / File | Lieu / Place | Auteur / Author | Licence / License | Source |
 |---|---|---|---|---|
@@ -29,3 +29,15 @@ The 19 photos bundled with Zen Home come from Wikimedia Commons ("Featured pictu
 Licences : [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 Police / Font : Poppins (Indian Type Foundry), [SIL Open Font License 1.1](https://openfontlicense.org).
+
+## Armadillo (VPN)
+
+ProxFibre embarque [Armadillo](https://github.com/Kazuryy/armadillo-android) v0.2.0, client Android TV de [Pangolin](https://github.com/fosrl/pangolin), distribué sous **GNU Affero General Public License v3**. L'APK est fourni tel quel, sans modification, dans `ecran-accueil/source/assets/armadillo/armadillo.apk` ; son code source est disponible à l'adresse ci-dessus et le texte complet de la licence dans `ecran-accueil/source/assets/armadillo/LICENSE.txt`. Copyright (c) 2026 Kazuryy.
+
+ProxFibre bundles [Armadillo](https://github.com/Kazuryy/armadillo-android) v0.2.0, an Android TV client for [Pangolin](https://github.com/fosrl/pangolin), released under the **GNU Affero General Public License v3**. The APK is shipped unmodified in `ecran-accueil/source/assets/armadillo/armadillo.apk`; its source code is available at the link above. The full license text is provided in `ecran-accueil/source/assets/armadillo/LICENSE.txt`. Copyright (c) 2026 Kazuryy.
+
+## AirPlay Server
+
+ProxFibre embarque [AirPlay Server](https://github.com/jqssun/android-airplay-server) v0.0.36, récepteur AirPlay 2 open source pour Android TV, distribué sous **GNU General Public License v3**. L'APK est fourni tel quel, sans modification, dans `ecran-accueil/source/assets/airplay/airplay.apk` ; le texte complet de la licence est dans `ecran-accueil/source/assets/airplay/LICENSE.txt`.
+
+ProxFibre bundles [AirPlay Server](https://github.com/jqssun/android-airplay-server) v0.0.36, an open-source AirPlay 2 receiver for Android TV, released under the **GNU General Public License v3**. The APK is shipped unmodified in `ecran-accueil/source/assets/airplay/airplay.apk`; the full license text is in `ecran-accueil/source/assets/airplay/LICENSE.txt`.
