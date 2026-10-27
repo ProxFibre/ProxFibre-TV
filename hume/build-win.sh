@@ -21,8 +21,8 @@ SDK_W="$(cygpath -m "$SDK" 2>/dev/null || echo "$SDK")"
 BT="$SDK_W/build-tools/34.0.0"
 D8="$SDK_W/build-tools/35.0.0/d8.bat"
 JAR="$SDK_W/platforms/android-34/android.jar"
-VERSION_CODE="${VERSION_CODE:-10000}"   # 1.0.0; kept above the old 12 so it installs over it
-VERSION_NAME="${VERSION_NAME:-1.0.0}"
+VERSION_CODE="${VERSION_CODE:-10001}"   # 1.0.1; kept above the old 12 so it installs over it
+VERSION_NAME="${VERSION_NAME:-1.0.1}"
 
 for f in "$BT/aapt2.exe" "$D8" "$JAR"; do
     [ -e "$f" ] || { echo "Missing $f — install build-tools 34/35 and platform android-34." >&2; exit 1; }
