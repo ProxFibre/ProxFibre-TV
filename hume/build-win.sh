@@ -58,6 +58,18 @@ javac -encoding UTF-8 --release 11 -classpath "$JAR" \
 
 "$BT/zipalign.exe" -f 4 build/unsigned.apk build/aligned.apk
 
+# Signing. Release builds: RELEASE_KEYSTORE + RELEASE_KEYSTORE_PASS (the private key lives in the
+# separate, private hume-launcher-signing repo). Development builds: a local debug key.
+if [ -n "${RELEASE_KEYSTORE:-}" ]; then
+    [ -n "${RELEASE_KEYSTORE_PASS:-}" ] || { echo "Set RELEASE_KEYSTORE_PASS for $RELEASE_KEYSTORE" >&2; exit 1; }
+    KS_W="$(cygpath -m "$RELEASE_KEYSTORE" 2>/dev/null || echo "$RELEASE_KEYSTORE")"
+    "$BT/apksigner.bat" sign --ks "$KS_W" --ks-pass env:RELEASE_KEYSTORE_PASS \
+        --ks-key-alias "${RELEASE_KEY_ALIAS:-hume-release}" --out build/ProxFibre.apk build/aligned.apk
+    echo "Signed with the release key"
+    echo "Built hume/build/ProxFibre.apk ($VERSION_NAME, versionCode $VERSION_CODE)"
+    exit 0
+fi
+
 KS=proxfibre.jks
 if [ ! -f "$KS" ]; then
     keytool -genkeypair -keystore "$KS" -storepass changeit -keypass changeit -alias k \
@@ -65,4 +77,5 @@ if [ ! -f "$KS" ]; then
 fi
 "$BT/apksigner.bat" sign --ks "$KS" --ks-pass pass:changeit --key-pass pass:changeit \
     --out build/ProxFibre.apk build/aligned.apk
+echo "Signed with the local debug key (development build)"
 echo "Built hume/build/ProxFibre.apk ($VERSION_NAME, versionCode $VERSION_CODE)"
