@@ -60,7 +60,9 @@
             android:excludeFromRecents="true"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|smallestScreenSize|screenLayout|uiMode|density">
-            <intent-filter>
+            <!-- priority: the stock launcher declares 2 on this HOME filter; on a tie the system keeps
+                 resolving HOME to that (system) app even when ProxFibre holds the HOME role, so 3. -->
+            <intent-filter android:priority="3">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />

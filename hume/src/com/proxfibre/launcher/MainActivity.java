@@ -2911,6 +2911,13 @@ public class MainActivity extends Activity {
         }
         resetIdle();
         if (!replayingBack) navSound(this, ev);  // a replayed Back already clicked
+        // The remote's Source/TV key: nothing else answers it once ProxFibre is the home screen (the
+        // stock launcher only handles it while it has focus), so open the input picker here.
+        if (ev.getAction() == KeyEvent.ACTION_UP && pickerLayer == null && menuLayer == null && moveIndex < 0
+                && (ev.getKeyCode() == KeyEvent.KEYCODE_TV_INPUT || ev.getKeyCode() == KeyEvent.KEYCODE_TV)) {
+            showInputs(getCurrentFocus());
+            return true;
+        }
         if (search != null && pickerLayer == search.layer && menuLayer == null) {
             return search.dispatch(ev) || super.dispatchKeyEvent(ev);
         }
