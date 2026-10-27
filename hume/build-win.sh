@@ -38,8 +38,9 @@ for it in zin.infolist():
 zin.close(); zout.close(); shutil.move(tmp, src)
 PY
 
-javac -encoding UTF-8 --release 11 -classpath "$JAR" \
-    -d build/classes $(find src build/gen -name '*.java')
+java_files=()
+while IFS= read -r -d '' f; do java_files+=("$f"); done < <(find src build/gen -name '*.java' -print0)
+javac -encoding UTF-8 --release 11 -classpath "$JAR" -d build/classes "${java_files[@]}"
 (cd build/classes && jar cf ../classes.jar .)
 "$D8" --release --min-api 24 --lib "$JAR" --output build/dex build/classes.jar
 (cd build/dex && jar uf ../unsigned.apk classes.dex)

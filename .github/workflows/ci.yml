@@ -37,6 +37,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Default packages include the legacy "tools" package, which Google removed from the
+          # SDK repository; platform-tools alone is enough, build-tools/platform come next.
+          packages: platform-tools
 
       - name: Install build-tools 34.0.0 and platform android-34
         run: sdkmanager --install "platforms;android-34" "build-tools;34.0.0"

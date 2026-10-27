@@ -5,6 +5,7 @@
 #  macOS / Linux (bash 3.2+)  -  lancé par LANCER.command ou LANCER.sh
 #  Portage de kit.ps1 : mêmes listes, mêmes fichiers de sauvegarde.
 # =====================================================================
+# shellcheck disable=SC2034  # C_Cyan/Green/Yellow/Red are read indirectly by color() via eval
 KIT="$(cd "$(dirname "$0")/.." && pwd)"
 SCRIPTS="$KIT/scripts"
 TOOLS="$KIT/outils"
@@ -104,7 +105,7 @@ Get_TvIdentity() {
     INFO_Brand="$(Prop ro.product.brand)"; INFO_Model="$(Prop ro.product.model)"
     INFO_Manufacturer="$(Prop ro.product.manufacturer)"
     INFO_Android="$(Prop ro.build.version.release)"; INFO_Sdk="$(Prop ro.build.version.sdk)"
-    INFO_Patch="$(Prop ro.build.version.security_patch)"; INFO_Build="$(Prop ro.build.display.id)"
+    INFO_Patch="$(Prop ro.build.version.security_patch)"
     INFO_Name="$(trim "$(Sh "settings get global device_name" | tr -d '\n')")"
 }
 
