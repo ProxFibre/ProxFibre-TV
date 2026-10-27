@@ -702,6 +702,10 @@ public class MainActivity extends Activity {
         updateWeather();
 
         setContentView(root);
+        // Cold start asked for by PowerService (Source key while another app had focus):
+        // onNewIntent only runs when we were already alive.
+        if (getIntent() != null && "inputs".equals(getIntent().getStringExtra("panel")))
+            handler.postDelayed(() -> showInputs(ccButton), 700);
     }
 
     void buildGrid() {

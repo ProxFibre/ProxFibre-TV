@@ -7,8 +7,10 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.accessibilityservice.AccessibilityServiceInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,37 @@ public class PowerService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         instance = this;
+        // Ask for key filtering: the remote's Source key has to be caught while another app has
+        // focus, since nothing else on the TV answers it once the stock launcher is disabled.
+        AccessibilityServiceInfo info = getServiceInfo();
+        if (info != null) {
+            info.flags |= AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS;
+            setServiceInfo(info);
+        }
+    }
+
+    /**
+     * The remote's Source (TV input) key, from any app: show ProxFibre's input picker. Consumed, as
+     * no other component on this TV reacts to it.
+     */
+    @Override
+    protected boolean onKeyEvent(KeyEvent e) {
+        int k = e.getKeyCode();
+        if (k != KeyEvent.KEYCODE_TV_INPUT && k != KeyEvent.KEYCODE_TV) return super.onKeyEvent(e);
+        android.util.Log.i("TvHome", "Source key " + k + " action " + e.getAction());
+        if (e.getAction() == KeyEvent.ACTION_UP) openInputs();
+        return true;
+    }
+
+    /** Brings ProxFibre forward with the same input panel the Inputs tile opens. */
+    private void openInputs() {
+        try {
+            startActivity(new Intent(this, MainActivity.class)
+                    .putExtra("panel", "inputs")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+        } catch (Exception e) {
+            android.util.Log.w("TvHome", "Source key: could not open the input panel: " + e);
+        }
     }
 
     @Override
