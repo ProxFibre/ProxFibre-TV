@@ -364,6 +364,7 @@ public class MainActivity extends Activity {
         }
         // Bundled apps: continue an install the user was in the middle of, and offer them once.
         Bundled.resume(this);
+        AppCatalog.resume(this);
         handler.removeCallbacks(bundledTick);
         handler.postDelayed(bundledTick, 1800);
         // Screensaver: ProxFibre never holds the screen on unless the user turned the screensaver off here.

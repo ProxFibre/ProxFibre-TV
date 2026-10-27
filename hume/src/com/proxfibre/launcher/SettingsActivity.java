@@ -52,7 +52,7 @@ public class SettingsActivity extends Activity {
     // tvOS-style pages: the main list opens a page per section; Back returns to the main list.
     static final String ROOT = "root", PROFILES = "Profiles", SHELF = "Top Shelf", PRESENT = "Presentation",
             INPUTS = "Inputs", WEATHER = "Weather", WATCHING = "Continue Watching", HOME = "Home",
-            PERMS = "Permissions", JELLYFIN = "Jellyfin", ABOUT = "About";
+            PERMS = "Permissions", JELLYFIN = "Jellyfin", APPS = "Apps", ABOUT = "About";
 
     FrameLayout leftPane;
     ScrollView scroller;
@@ -103,6 +103,7 @@ public class SettingsActivity extends Activity {
             case HOME: pageHome(); break;
             case PERMS: pagePermissions(); break;
             case JELLYFIN: pageJellyfin(); break;
+            case APPS: pageApps(); break;
             case ABOUT: pageAbout(); break;
             default: pageRoot(); break;
         }
@@ -132,7 +133,11 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        refreshAll();  // e.g. a permission granted on a system screen
+        // A permission (install unknown apps, location…) may have just been granted on a system
+        // screen: continue any install that was waiting for it, then refresh what it shows.
+        Bundled.resume(this);
+        AppCatalog.resume(this);
+        refreshAll();
     }
 
     @Override
@@ -211,6 +216,7 @@ public class SettingsActivity extends Activity {
             case HOME: grad = new int[]{0xFF30D158, 0xFF1E9E48}; glyph = "house"; break;
             case PERMS: grad = new int[]{0xFF8E8E93, 0xFF48484A}; glyph = "shield"; break;
             case JELLYFIN: grad = new int[]{0xFF5E5CE6, 0xFF3634A3}; glyph = "shelf"; break;
+            case APPS: grad = new int[]{0xFFFF9F0A, 0xFFC2730A}; glyph = "memory"; break;
             default: grad = new int[]{0xFF8E8E93, 0xFF3A3A3C}; glyph = "gear"; break;
         }
         android.graphics.Bitmap b = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888);
@@ -245,6 +251,7 @@ public class SettingsActivity extends Activity {
         nav(WATCHING, () -> !Profiles.homePrefs(this).getBoolean("cw_enabled", true) ? "Off" : MediaWatchService.granted(this) ? "On"
                 : Perms.listenerSupported(this) ? "Needs permission" : "Not on this TV");
         nav(JELLYFIN, () -> Jellyfin.configured(this) ? Jellyfin.status(this) : "Not connected");
+        nav(APPS, () -> AppCatalog.custom(this).isEmpty() ? "Armadillo, AirPlay…" : AppCatalog.custom(this).size() + " custom");
         nav(HOME, () -> {
             String k = Profiles.homePrefs(this).getString("wallpaper", "aurora");
             int i = java.util.Arrays.asList(MainActivity.WALL_KEYS).indexOf(k);
@@ -594,6 +601,60 @@ public class SettingsActivity extends Activity {
         row("Based on", () -> "Hume Launcher by Petrobot", () -> { });
         row("Weather", () -> Weather.sourceName(Weather.source(this)), () -> { });
         row("News", () -> News.sources(this).size() + " French newsrooms", () -> { });
+    }
+
+    // ---------------------------------------------------------------- Apps
+
+    /** Armadillo and AirPlay (fetched live from their own GitHub releases) plus apps added here. */
+    void pageApps() {
+        section("Built in");
+        for (AppCatalog.Entry e : AppCatalog.all(this)) {
+            if (e.custom) continue;
+            row(e.name, () -> AppCatalog.status(this, e), () -> AppCatalog.install(this, e));
+        }
+        List<AppCatalog.Entry> customApps = AppCatalog.custom(this);
+        if (!customApps.isEmpty()) {
+            section("Your apps");
+            for (AppCatalog.Entry e : customApps) {
+                row(e.name, () -> AppCatalog.status(this, e), () -> dialog(e.name)
+                        .setItems(new String[]{Lang.t("Install"), Lang.t("Remove")}, (d, w) -> {
+                            if (w == 0) AppCatalog.install(this, e);
+                            else {
+                                AppCatalog.removeCustom(this, e.id);
+                                show(APPS);
+                            }
+                        }).show());
+            }
+        }
+        section("Add an app");
+        row("Add from GitHub or a link", () -> "", this::addCustomApp);
+    }
+
+    /** Adds a custom app: a name, and either a GitHub "owner/repo" or a direct .apk link. */
+    void addCustomApp() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int pad = Ui.px(this, 18);
+        box.setPadding(pad, Ui.px(this, 6), pad, 0);
+        final android.widget.EditText name = field("Name, e.g. Stremio", "");
+        final android.widget.EditText source = field("owner/repo or https://…/app.apk", "");
+        box.addView(name);
+        box.addView(source);
+        dialog("Add an app")
+                .setMessage(Lang.s("A GitHub repo (owner/repo) installs its latest release .apk; a direct link installs that file.",
+                        "Un dépôt GitHub (owner/repo) installe sa dernière release .apk ; un lien direct installe ce fichier.",
+                        "Un repositorio de GitHub (owner/repo) instala su última versión .apk; un enlace directo instala ese archivo."))
+                .setView(box)
+                .setPositiveButton(Lang.t("Add"), (d, w) -> {
+                    String n = name.getText().toString().trim();
+                    String src = source.getText().toString().trim();
+                    if (n.isEmpty() || src.isEmpty()) return;
+                    AppCatalog.addCustom(this, n, src);
+                    show(APPS);
+                })
+                .setNegativeButton(Lang.t("Cancel"), null)
+                .show();
+        name.requestFocus();
     }
 
     // ---------------------------------------------------------------- Jellyfin

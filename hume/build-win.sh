@@ -1,19 +1,7 @@
 #!/bin/bash
 # Builds and signs build/tvos-home.apk on Windows (Git Bash), with the same steps as build.sh.
-#
-# Armadillo and the AirPlay server ship inside the APK: aapt2 packages assets/armadillo and
-# assets/airplay as-is, and Bundled.java extracts and offers them on first run. The two APKs are
-# kept once for the whole project, in ecran-accueil/source/assets, and copied here when missing.
 set -euo pipefail
 cd "$(dirname "$0")"
-
-SHARED="$(cd ../ecran-accueil/source/assets && pwd)"
-for app in armadillo airplay; do
-    if [ ! -f "assets/$app/$app.apk" ]; then
-        mkdir -p "assets/$app"
-        cp "$SHARED/$app/"* "assets/$app/"
-    fi
-done
 
 # JDK 17+ and the Android SDK. Override with JAVA_HOME / ANDROID_HOME.
 SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$LOCALAPPDATA/Android/Sdk}}"
