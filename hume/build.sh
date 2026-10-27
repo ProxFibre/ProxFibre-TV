@@ -25,9 +25,13 @@ rm -rf build && mkdir -p build/gen build/classes build/dex
     -A assets --java build/gen --min-sdk-version 24 --target-sdk-version 34 \
     --version-code "${VERSION_CODE:-10003}" --version-name "${VERSION_NAME:-1.0.3}" build/res.zip
 
-javac -encoding UTF-8 --release 11 -classpath "$JAR" \
-    -d build/classes $(find src build/gen -name '*.java')
-"$BT/d8" --release --min-api 24 --lib "$JAR" --output build/dex $(find build/classes -name '*.class')
+java_files=()
+while IFS= read -r -d '' f; do java_files+=("$f"); done < <(find src build/gen -name '*.java' -print0)
+javac -encoding UTF-8 --release 11 -classpath "$JAR" -d build/classes "${java_files[@]}"
+
+class_files=()
+while IFS= read -r -d '' f; do class_files+=("$f"); done < <(find build/classes -name '*.class' -print0)
+"$BT/d8" --release --min-api 24 --lib "$JAR" --output build/dex "${class_files[@]}"
 (cd build/dex && zip -q ../unsigned.apk classes.dex)
 
 "$BT/zipalign" -f 4 build/unsigned.apk build/aligned.apk
