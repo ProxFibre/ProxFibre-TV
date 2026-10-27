@@ -203,3 +203,14 @@ RELEASE_KEYSTORE=/path/to/hume-release.jks RELEASE_KEYSTORE_PASS=... VERSION_COD
 ```
 
 A debug build can't update a release install (different key): uninstall first.
+
+### CI/CD
+
+- `.github/workflows/ci.yml` builds the debug APK and lints the shell/PowerShell scripts on every
+  push to `main` and every pull request.
+- `.github/workflows/release.yml` is triggered by hand (Actions tab → Run workflow) with a version
+  name and code. It needs these repository secrets, set by a maintainer:
+  - `RELEASE_KEYSTORE_BASE64`: the release `.jks` keystore, base64-encoded (`base64 -i hume-release.jks`).
+  - `RELEASE_KEYSTORE_PASS`: its password.
+  - `RELEASE_KEY_ALIAS` (optional): defaults to `hume-release`.
+  It then tags the commit (`v<version>`) and publishes a GitHub Release with the signed APK.
