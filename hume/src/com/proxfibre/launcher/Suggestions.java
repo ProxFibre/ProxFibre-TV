@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Top-shelf suggestions: what's popular in India on the user's streaming services, from TMDB
+ * Top-shelf suggestions: what's popular in France on the user's streaming services, from TMDB
  * (themoviedb.org). Results and artwork are cached on disk; everything here runs off the UI thread.
  */
 final class Suggestions {
@@ -53,7 +53,7 @@ final class Suggestions {
     /** POOL titles are fetched per service; PER_SOURCE of them are picked at random each refresh. */
     static final int PER_SOURCE = 3, POOL = 20, MAX_ITEMS = 10;
 
-    /** A streaming service available in India: TMDB provider id, display name, Android TV package. */
+    /** A streaming service available in France: TMDB provider id, display name, Android TV package. */
     static final class Provider {
         final int id;
         final String name, pkg, jwShort, jwTech;
@@ -70,10 +70,10 @@ final class Suggestions {
     static final List<Provider> PROVIDERS = Arrays.asList(
             new Provider(8, "Netflix", "com.netflix.ninja", "nfx", "netflix"),
             new Provider(119, "Prime Video", "com.amazon.amazonvideo.livingroom", "prv", "amazonprimevideo"),
-            new Provider(2336, "JioHotstar", "in.startv.hotstar", "jhs", "jiohotstar"),
+            new Provider(337, "Disney+", "com.disney.disneyplus", "dnp", "disneyplus"),
             new Provider(350, "Apple TV", "com.apple.atve.androidtv.appletv", "atp", "appletvplus"),
-            new Provider(232, "ZEE5", "com.graymatrix.did", "zee", "zee5"),
-            new Provider(237, "SonyLIV", "com.sonyliv", "snl", "sonyliv"));
+            new Provider(381, "Canal+", "com.canal.android.canal", "cpd", "canalplus"),
+            new Provider(531, "Paramount+", "com.cbs.ott", "pmp", "paramountplus"));
 
     /**
      * Apps that open Cinemeta titles by IMDb id. Not streaming services, so they never appear in
@@ -84,8 +84,8 @@ final class Suggestions {
             NUVIO = new Provider(NUVIO_ID, "Nuvio", "com.nuvio.tv", "", "");
 
     /** Original-language filters offered in settings (TMDB ISO 639-1 codes). */
-    static final String[] LANG_CODES = {"hi", "en", "ta", "te", "ml", "kn", "bn", "mr"};
-    static final String[] LANG_NAMES = {"Hindi", "English", "Tamil", "Telugu", "Malayalam", "Kannada", "Bengali", "Marathi"};
+    static final String[] LANG_CODES = {"fr", "en", "es", "de", "it", "ja", "ko"};
+    static final String[] LANG_NAMES = {"French", "English", "Spanish", "German", "Italian", "Japanese", "Korean"};
 
     static final class Item {
         int id, providerId;
@@ -200,6 +200,74 @@ final class Suggestions {
 
     static boolean hasToken(Context c) {
         return !prefs(c).getString(K_TOKEN, "").trim().isEmpty();
+    }
+
+    /** The streaming service whose dock icon this package is, if any (for a per-app top shelf). */
+    static Provider providerForPkg(String pkg) {
+        for (Provider p : PROVIDERS) if (p.pkg.equals(pkg)) return p;
+        return null;
+    }
+
+    /**
+     * Whether this dock app has its own top shelf (tvOS-style: the focused app is the source)
+     * instead of the global mix: a streaming service under the chosen source (JustWatch/TMDB;
+     * Stremio's Cinemeta lists aren't per-service), or the connected Jellyfin library.
+     */
+    static boolean hasAppShelf(Context c, String pkg) {
+        if (Jellyfin.enabled(c) && Jellyfin.configured(c) && Jellyfin.isClient(pkg)) return true;
+        return showRecs(c) && !source(c).equals(SRC_STREMIO) && providerForPkg(pkg) != null;
+    }
+
+    /** Cached per-app shelf for pkg (null when missing/stale, or when pkg has none). */
+    static List<Item> appShelf(Context c, String pkg, boolean allowStale) {
+        if (Jellyfin.enabled(c) && Jellyfin.configured(c) && Jellyfin.isClient(pkg)) {
+            return Jellyfin.shelfCached(c, allowStale);
+        }
+        Provider p = providerForPkg(pkg);
+        return p == null ? null : providerPool(c, p.id, allowStale);
+    }
+
+    /** Fetches (blocking) a fresh per-app shelf for pkg; null when pkg has none or it comes up empty. */
+    static List<Item> fetchAppShelf(Context c, String pkg) throws Exception {
+        if (Jellyfin.enabled(c) && Jellyfin.configured(c) && Jellyfin.isClient(pkg)) {
+            List<Item> items = Jellyfin.items(c, Jellyfin.shelfMode(c));
+            Jellyfin.writeShelfCache(c, items);
+            return items.isEmpty() ? null : items;
+        }
+        Provider p = providerForPkg(pkg);
+        if (p == null) return null;
+        fetchRecs(c);  // refreshes every enabled provider's pool as a side effect
+        return providerPool(c, p.id, true);
+    }
+
+    static File providerCacheFile(Context c, int providerId) {
+        return new File(c.getFilesDir(), "shelf_provider_" + providerId + ".json");
+    }
+
+    static void writeProviderPool(Context c, int providerId, List<Item> items) {
+        try {
+            JSONArray a = new JSONArray();
+            for (Item it : items) a.put(it.toJson());
+            try (OutputStream os = new FileOutputStream(providerCacheFile(c, providerId))) {
+                os.write(a.toString().getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            android.util.Log.w("TvHome", "provider shelf cache: " + e);
+        }
+    }
+
+    static List<Item> providerPool(Context c, int providerId, boolean allowStale) {
+        File f = providerCacheFile(c, providerId);
+        if (!f.exists()) return null;
+        if (!allowStale && System.currentTimeMillis() - f.lastModified() > MAX_AGE_MS) return null;
+        try {
+            JSONArray a = new JSONArray(new String(readAll(new FileInputStream(f)), StandardCharsets.UTF_8));
+            List<Item> out = new ArrayList<>();
+            for (int i = 0; i < a.length(); i++) out.add(Item.fromJson(a.getJSONObject(i)));
+            return out.isEmpty() ? null : out;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /** "both", "movie" or "tv". */
@@ -341,7 +409,7 @@ final class Suggestions {
             + " title originalReleaseYear shortDescription genres { shortName } backdrops { backdropUrl } scoring { imdbScore } }"
             + " offers(country: $country, platform: WEB) { standardWebURL package { technicalName } } } } } }";
 
-    /** What's popular in India per service, from JustWatch's public GraphQL endpoint (no key). */
+    /** What's popular in France per service, from JustWatch's public GraphQL endpoint (no key). */
     static List<List<Item>> fetchJustWatch(Context c) throws Exception {
         String t = types(c);
         List<String> kinds = t.equals("both") ? Arrays.asList("tv", "movie") : Arrays.asList(t);
@@ -349,12 +417,13 @@ final class Suggestions {
         List<List<Item>> sources = new ArrayList<>();
         for (Provider p : PROVIDERS) {
             if (!provs.contains(String.valueOf(p.id))) continue;
+            List<Item> pool = new ArrayList<>();
             for (String kind : kinds) {
                 JSONObject filter = new JSONObject()
                         .put("packages", new JSONArray().put(p.jwShort))
                         .put("objectTypes", new JSONArray().put(kind.equals("tv") ? "SHOW" : "MOVIE"))
                         .put("monetizationTypes", new JSONArray().put("FLATRATE").put("FREE").put("ADS"));
-                JSONObject vars = new JSONObject().put("country", "IN").put("language", "en")
+                JSONObject vars = new JSONObject().put("country", "FR").put("language", "fr")
                         .put("first", POOL).put("filter", filter);
                 JSONObject body = new JSONObject().put("query", JW_QUERY).put("variables", vars);
                 JSONObject res = post("https://apis.justwatch.com/graphql", body.toString());
@@ -390,7 +459,9 @@ final class Suggestions {
                     list.add(it);
                 }
                 sources.add(list);
+                pool.addAll(list);
             }
+            writeProviderPool(c, p.id, pool);
         }
         return sources;
     }
@@ -488,10 +559,11 @@ final class Suggestions {
         List<List<Item>> sources = new ArrayList<>();
         for (Provider p : PROVIDERS) {
             if (!provs.contains(String.valueOf(p.id))) continue;
+            List<Item> pool = new ArrayList<>();
             for (String kind : kinds) {
                 StringBuilder q = new StringBuilder("/discover/").append(kind)
-                        .append("?watch_region=IN&with_watch_monetization_types=flatrate&sort_by=popularity.desc")
-                        .append("&language=en-IN&include_adult=false&with_watch_providers=").append(p.id);
+                        .append("?watch_region=FR&with_watch_monetization_types=flatrate&sort_by=popularity.desc")
+                        .append("&language=fr-FR&include_adult=false&with_watch_providers=").append(p.id);
                 if (!langs.isEmpty()) q.append("&with_original_language=").append(URLEncoder.encode(String.join("|", langs), "UTF-8"));
                 JSONArray results = get(c, q.toString()).optJSONArray("results");
                 List<Item> list = new ArrayList<>();
@@ -513,7 +585,9 @@ final class Suggestions {
                     list.add(it);
                 }
                 sources.add(list);
+                pool.addAll(list);
             }
+            writeProviderPool(c, p.id, pool);
         }
         return sources;
     }
@@ -523,7 +597,7 @@ final class Suggestions {
         if (it.logo != null) return it.logo;
         if (!source(c).equals(SRC_TMDB)) return "";
         try {
-            JSONArray logos = get(c, "/" + it.type + "/" + it.id + "/images?include_image_language=en,hi,null")
+            JSONArray logos = get(c, "/" + it.type + "/" + it.id + "/images?include_image_language=en,fr,null")
                     .optJSONArray("logos");
             String best = "";
             for (int i = 0; logos != null && i < logos.length(); i++) {
@@ -700,10 +774,10 @@ final class Suggestions {
         switch (p.id) {
             case 8: tries.add(view("https://www.netflix.com/search?q=" + enc, p.pkg)); break;
             case 119: tries.add(view("https://www.primevideo.com/search/?phrase=" + enc, p.pkg)); break;
-            case 2336: tries.add(view("https://www.hotstar.com/in/search?q=" + enc, p.pkg)); break;
+            case 337: tries.add(view("https://www.disneyplus.com/search?q=" + enc, p.pkg)); break;
             case 350: tries.add(view("https://tv.apple.com/search?term=" + enc, p.pkg)); break;
-            case 232: tries.add(view("https://www.zee5.com/search?q=" + enc, p.pkg)); break;
-            case 237: tries.add(view("https://www.sonyliv.com/search?searchTerm=" + enc, p.pkg)); break;
+            case 381: tries.add(view("https://www.canalplus.com/search?q=" + enc, p.pkg)); break;
+            case 531: tries.add(view("https://www.paramountplus.com/search/?q=" + enc, p.pkg)); break;
             default: break;
         }
         PackageManager pm = c.getPackageManager();

@@ -157,6 +157,10 @@ public class MainActivity extends Activity {
     int heroIndex;
     boolean heroShown;          // carousel currently forms the background
     int heroVersion = -1;       // Suggestions.version() the items were loaded for
+    /** Dock app whose own top shelf is showing (tvOS-style), or null for the global mix. */
+    String heroAppPkg;
+    /** Dock app showing its own static banner (no dedicated shelf of its own), or null. */
+    AppEntry heroStaticApp;
     String wallStyle;
     /** What Liquid Glass samples: a blurred copy of the wallpaper or of the carousel artwork. */
     Bitmap wallBlur, heroBlur, glassBg;
@@ -231,9 +235,9 @@ public class MainActivity extends Activity {
         wallPrefetchStyle = wall;
         new Thread((Runnable) wallPrefetch, "hume-wallpaper").start();
         // After an update that changes what the top shelf holds, start from a fresh carousel.
-        if (Suggestions.prefs(this).getInt("cache_format", 0) != 4) {
+        if (Suggestions.prefs(this).getInt("cache_format", 0) != 5) {
             Suggestions.changed(this);
-            Suggestions.prefs(this).edit().putInt("cache_format", 4).apply();
+            Suggestions.prefs(this).edit().putInt("cache_format", 5).apply();
         }
         buildChrome();
         try {
@@ -1581,6 +1585,54 @@ public class MainActivity extends Activity {
      * screen, the photo itself sits sharp on the right ~60% and fades in from the left, and the left
      * side is a near-solid dark panel for the headline and summary. Baked once per story.
      */
+    /** A small TV banner stretched to fill the screen: blurred fill behind, the banner centre-cropped on top. */
+    Bitmap bakeAppBanner(Bitmap src) {
+        if (src == null) return null;
+        int tw = Math.min(1280, screenW), th = tw * screenH / screenW;
+        Bitmap out = Bitmap.createBitmap(tw, th, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(out);
+        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
+        Bitmap tiny = Bitmap.createScaledBitmap(src, 32, Math.max(1, 32 * src.getHeight() / src.getWidth()), true);
+        c.drawBitmap(tiny, null, new android.graphics.RectF(0, 0, tw, th), p);
+        tiny.recycle();
+        c.drawColor(0x660B0B10);
+        float scale = Math.max((float) tw / src.getWidth(), (float) th / src.getHeight());
+        float sw = tw / scale, sh = th / scale;
+        Rect from = new Rect((int) ((src.getWidth() - sw) / 2), (int) ((src.getHeight() - sh) / 2),
+                (int) ((src.getWidth() + sw) / 2), (int) ((src.getHeight() + sh) / 2));
+        c.drawBitmap(src, from, new android.graphics.RectF(0, 0, tw, th), p);
+        src.recycle();
+        Paint shade = new Paint(Paint.DITHER_FLAG);
+        shade.setShader(new LinearGradient(0, 0, 0, th, new int[]{0x14000000, 0x33000000, 0xA6000000}, null, Shader.TileMode.CLAMP));
+        c.drawRect(0, 0, tw, th, shade);
+        topShade(c, tw, th);
+        return out;
+    }
+
+    /**
+     * A generic app icon: shown at its own size (never blown up past 2x), centred over a soft blur
+     * of itself, so a small icon never looks stretched or pixelated.
+     */
+    Bitmap bakeAppIcon(Bitmap src) {
+        if (src == null) return null;
+        int tw = Math.min(1280, screenW), th = tw * screenH / screenW;
+        Bitmap out = Bitmap.createBitmap(tw, th, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(out);
+        Paint p = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
+        Bitmap tiny = Bitmap.createScaledBitmap(src, 32, Math.max(1, 32 * src.getHeight() / src.getWidth()), true);
+        c.drawBitmap(tiny, null, new android.graphics.RectF(0, 0, tw, th), p);
+        tiny.recycle();
+        c.drawColor(0x8A0B0B10);
+        float maxW = tw * 0.42f, maxH = th * 0.42f;
+        float scale = Math.min(Math.min(maxW / src.getWidth(), maxH / src.getHeight()), 2f);
+        float dw = src.getWidth() * scale, dh = src.getHeight() * scale;
+        android.graphics.RectF dst = new android.graphics.RectF((tw - dw) / 2f, (th - dh) / 2f, (tw + dw) / 2f, (th + dh) / 2f);
+        c.drawBitmap(src, null, dst, p);
+        src.recycle();
+        topShade(c, tw, th);
+        return out;
+    }
+
     Bitmap bakeNews(Bitmap src) {
         if (src == null) return null;
         int tw = Math.min(1280, screenW), th = tw * screenH / screenW;
@@ -1743,6 +1795,14 @@ public class MainActivity extends Activity {
      * titles mixed in (if it's on) — one after every two items; or Continue Watching alone.
      */
     void loadHero() {
+        if (heroAppPkg != null) {
+            loadAppHero(heroAppPkg);
+            return;
+        }
+        if (heroStaticApp != null) {
+            showStaticHero(heroStaticApp);
+            return;
+        }
         updateEmpty();
         boolean shelf = Suggestions.enabled(this) && Suggestions.ready(this);
         boolean cw = cwEnabled();
@@ -1895,7 +1955,9 @@ public class MainActivity extends Activity {
         io.execute(() -> {
             Bitmap raw = Suggestions.image(this, it.backdrop, "w1280", Math.min(1280, screenW));
             Bitmap bd = "news".equals(it.type) ? bakeNews(raw)
-                    : "wall".equals(it.type) ? bakeWall(raw) : bakeScrims(raw);
+                    : "wall".equals(it.type) ? bakeWall(raw)
+                    : "appwide".equals(it.type) ? bakeAppBanner(raw)
+                    : "app".equals(it.type) ? bakeAppIcon(raw) : bakeScrims(raw);
             Bitmap bdBlur = Ui.glassBackdrop(bd, 160, 90);
             String logoPath = Suggestions.logoFor(this, it);
             Bitmap logo = logoPath.isEmpty() ? null : Suggestions.image(this, logoPath, "w500", 500);
@@ -1920,7 +1982,7 @@ public class MainActivity extends Activity {
     /** Title/meta/overview for an item, applied in the same frame as its artwork. */
     void applyHeroInfo(Suggestions.Item it, Bitmap logo, int dir) {
         boolean news = "news".equals(it.type);
-        if ("wall".equals(it.type)) {          // a fond: no text, no button, nothing to read
+        if ("wall".equals(it.type) || "app".equals(it.type) || "appwide".equals(it.type)) {  // nothing to read: just the artwork
             heroButton.setVisibility(View.GONE);
             heroRemove.setVisibility(View.GONE);
             heroStrip.setVisibility(View.GONE);
@@ -2776,6 +2838,150 @@ public class MainActivity extends Activity {
 
     void updateShelf(AppEntry a) {
         shelfEntry = a;
+        boolean dockFocus = hasDock() && focusedIndex < COLS;
+        String pkg = dockFocus && a != null ? a.pkg : null;
+        String staticPkg = heroStaticApp == null ? null : heroStaticApp.pkg;
+        if (pkg != null && Suggestions.hasAppShelf(this, pkg)) {
+            heroStaticApp = null;
+            if (!pkg.equals(heroAppPkg)) loadAppHero(pkg);
+        } else if (pkg != null) {
+            heroAppPkg = null;
+            if (!pkg.equals(staticPkg)) showStaticHero(a);
+        } else if (heroAppPkg != null || heroStaticApp != null) {
+            heroAppPkg = null;
+            heroStaticApp = null;
+            loadHero();
+        }
+    }
+
+    /** Known bundled apps whose real tvOS Top Shelf artwork ships with Hume (high-res, no upscale). */
+    static final java.util.Map<String, Integer> CURATED_TOPSHELF = new java.util.HashMap<>();
+    static {
+        CURATED_TOPSHELF.put(Bundled.ARMADILLO, R.drawable.topshelf_armadillo);
+    }
+
+    /**
+     * tvOS fallback: an app with no shelf of its own shows its own artwork, never another app's
+     * content. A curated Top Shelf image (above) fills the screen like Apple's own; otherwise the
+     * app's icon is shown at its own size, centred over a soft blur, so it never looks upscaled.
+     */
+    void showStaticHero(AppEntry a) {
+        heroStaticApp = a;
+        String pkg = a.pkg;
+        io.execute(() -> {
+            List<Suggestions.Item> items = new ArrayList<>();
+            Integer curated = CURATED_TOPSHELF.get(pkg);
+            java.io.File f = curated != null ? curatedBannerFile(pkg, curated) : appIconFile(a);
+            if (f != null) {
+                Suggestions.Item it = new Suggestions.Item();
+                it.title = a.label;
+                it.type = curated != null ? "appwide" : "app";
+                it.backdrop = f.getPath();
+                it.overview = "";
+                it.genres = "";
+                it.year = "";
+                it.pkg = "";
+                it.link = "";
+                items.add(it);
+            }
+            handler.post(() -> {
+                if (heroStaticApp != null && pkg.equals(heroStaticApp.pkg)) setHeroItems(items);
+            });
+        });
+    }
+
+    /** Copies a bundled curated Top Shelf drawable to a cache file once, for the usual image path. */
+    java.io.File curatedBannerFile(String pkg, int resId) {
+        java.io.File dir = new java.io.File(getCacheDir(), "appshelf");
+        dir.mkdirs();
+        java.io.File f = new java.io.File(dir, pkg.replaceAll("[^A-Za-z0-9.]", "_") + "_curated.png");
+        if (f.exists()) return f;
+        try (java.io.InputStream in = getResources().openRawResource(resId);
+             java.io.OutputStream os = new java.io.FileOutputStream(f)) {
+            byte[] buf = new byte[16384];
+            int n;
+            while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+            return f;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * An app's own launcher icon at the highest density this device has, rendered to a cached PNG
+     * once. Icons are much higher resolution than the old 320x180 TV banner, so they stay sharp
+     * when centred rather than stretched full screen.
+     */
+    java.io.File appIconFile(AppEntry a) {
+        java.io.File dir = new java.io.File(getCacheDir(), "appshelf");
+        dir.mkdirs();
+        java.io.File f = new java.io.File(dir, a.pkg.replaceAll("[^A-Za-z0-9.]", "_") + ".png");
+        if (f.exists()) return f;
+        Drawable d = highResIcon(a.pkg);
+        if (d == null) d = a.icon != null ? a.icon : a.banner;
+        if (d == null) return null;
+        int size = 512;
+        try {
+            Bitmap b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(b);
+            // Keep the icon's own aspect ratio inside the square canvas (adaptive icons are square;
+            // banners and odd icons aren't) instead of stretching it to fill the bitmap.
+            float iw = d.getIntrinsicWidth() > 0 ? d.getIntrinsicWidth() : size;
+            float ih = d.getIntrinsicHeight() > 0 ? d.getIntrinsicHeight() : size;
+            float s = Math.min(size / iw, size / ih);
+            int dw = Math.round(iw * s), dh = Math.round(ih * s);
+            d.setBounds((size - dw) / 2, (size - dh) / 2, (size + dw) / 2, (size + dh) / 2);
+            d.draw(c);
+            try (java.io.OutputStream os = new java.io.FileOutputStream(f)) {
+                b.compress(Bitmap.CompressFormat.PNG, 100, os);
+            }
+            b.recycle();
+            return f;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** The app's launcher icon forced to the highest density bucket this device has, for less blur. */
+    Drawable highResIcon(String pkg) {
+        try {
+            PackageManager pm = getPackageManager();
+            ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
+            if (ai.icon == 0) return null;
+            android.content.res.Resources res = pm.getResourcesForApplication(ai);
+            return res.getDrawableForDensity(ai.icon, android.util.DisplayMetrics.DENSITY_XXXHIGH, null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Per-app top shelf (tvOS-style): the focused dock app is the source, e.g. what's trending on
+     * Netflix, or Jellyfin's own Continue Watching / Recently added, instead of the global mix.
+     */
+    void loadAppHero(String pkg) {
+        heroAppPkg = pkg;
+        io.execute(() -> {
+            List<Suggestions.Item> cached = Suggestions.appShelf(this, pkg, true);
+            if (cached != null && !cached.isEmpty()) {
+                handler.post(() -> { if (pkg.equals(heroAppPkg)) setHeroItems(cached); });
+            }
+            if (Suggestions.appShelf(this, pkg, false) == null) {
+                try {
+                    List<Suggestions.Item> fresh = Suggestions.fetchAppShelf(this, pkg);
+                    if (fresh != null && !fresh.isEmpty()) {
+                        handler.post(() -> { if (pkg.equals(heroAppPkg)) setHeroItems(fresh); });
+                    } else if (cached == null) {
+                        handler.post(() -> { if (pkg.equals(heroAppPkg)) { heroAppPkg = null; loadHero(); } });
+                    }
+                } catch (Exception e) {
+                    android.util.Log.w("TvHome", "app shelf: " + e);
+                    if (cached == null) {
+                        handler.post(() -> { if (pkg.equals(heroAppPkg)) { heroAppPkg = null; loadHero(); } });
+                    }
+                }
+            }
+        });
     }
 
     void focusIndex(int i) {

@@ -15,7 +15,7 @@ Everything Hume Launcher does, by area. For how the code is organised see
 The first time Hume opens it walks through Apple-style pages, one question each (OK moves on, Back
 goes back):
 
-1. **Welcome**, fading through Indian and world languages, then *Get Started*.
+1. **Welcome**, fading through French and world languages, then *Get Started*.
 2. **Create Your Profile**: a name and an emoji avatar.
 3. **Choose a look**: the background, previewed live behind the page.
 4. **Your Home Screen** (this profile): Recommendations, News and Continue Watching on/off.
@@ -87,20 +87,19 @@ remote, the Search key on remotes that have one, or just start typing on a keybo
 Assistant/mic button on most Android TV remotes is taken by Google Assistant before any app sees
 it, so it can't open Hume's Search.)
 
-- **Keyboard**: a–z, space, delete, **123** (digits and punctuation), **अआ** (Hindi letters) and
+- **Keyboard**: a–z, space, delete, **123** (digits and punctuation), **éè** (accented letters) and
   clear. A USB/Bluetooth keyboard and the remote's number keys type too.
 - **Dictation**: the **mic** beside the search field (Up from the keyboard), or the remote's
   search/mic button on Home or in Search. Where the TV has Google's voice service, the words appear
   in the field as you speak and results follow; the microphone is asked for on screen the first
   time. Esc on a keyboard, or Back, closes Search. Without that permission or service, the TV's own voice prompt (Google's) listens instead.
-  English and Hindi (Indian English, with Hindi as a second language).
+  French, with English as a second language.
 - **Before typing**: your recent searches (per profile) and what's trending in the carousel.
 - **Apps & Settings** (instant, no internet): installed apps including hidden ones, TV inputs
   ("HDMI 2"), Hume screens (Control Center, Weather, Switch Profile, Hume Settings) and TV settings
   ("wifi", "bluetooth", "screensaver"…).
-- **Movies & TV**: every title on any streaming service in India from JustWatch — Hindi and
-  regional titles included, and searches typed in Hindi (पंचायत) work — as posters with the logos
-  of the services that have each one. With Stremio or Nuvio installed, **On Stremio** adds titles
+- **Movies & TV**: every title on any streaming service in France from JustWatch — as posters
+  with the logos of the services that have each one. With Stremio or Nuvio installed, **On Stremio** adds titles
   only Stremio's catalogue has. Titles are searched once typing pauses; repeat searches are
   instant.
 - **How to Watch**: OK on a poster opens the title's page (artwork, year, genres, IMDb rating,
@@ -121,14 +120,20 @@ it, so it can't open Hume's Search.)
 
 ## Carousel (top shelf)
 
-Full-screen artwork behind the dock while a dock app is focused. One carousel holds, in order:
+Full-screen artwork behind the dock while a dock app is focused, tvOS-style: a streaming service
+(Netflix, Prime Video, Disney+, Apple TV+, Canal+, Paramount+) shows what's trending on that service
+itself, and Jellyfin shows its own library (Settings → Jellyfin → **Top shelf shows**: Continue
+Watching, Recently added, or both). Any other app, and the dock itself when nothing matches, falls
+back to the global mix below.
+
+The global mix holds, in order:
 
 1. **Continue Watching** (up to six): what you played recently in each app, from the "now playing"
    information apps publish (title, artwork, position, time left). **▶ Resume** opens the app;
    **✕ Remove** drops it. Titles not played again for **7 days** expire.
 2. **News** and **recommendations**, alternating.
 
-- **Recommendations**: popular titles in India on your services. Source **JustWatch** (no key,
+- **Recommendations**: popular titles in France on your services. Source **JustWatch** (no key,
   unofficial API) or **TMDB** (free key). Each refresh picks at random from each service's top 20,
   so the set changes through the day (every 2 hours, or Refresh). **▶ Open** goes to the title's
   page in the app.
@@ -138,9 +143,9 @@ Full-screen artwork behind the dock while a dock app is focused. One carousel ho
   Source; with Stremio chosen, *Opens in* shows which app will be used.
 
   ![Stremio as the source](images/settings-stremio.jpg)
-- **News**: India, local (your city, from the weather location) and world, from Indian newsrooms'
-  RSS feeds with large images: Times of India, Hindustan Times, The Indian Express, India Today and
-  News18 by default (NDTV and The Hindu optional). An editorial layout made for reading: headline,
+- **News**: France, local (your city, from the weather location) and world, from French newsrooms'
+  RSS feeds with large images: France Info, Le Monde, Le Figaro, France 24 and BFMTV by default
+  (20 Minutes optional). An editorial layout made for reading: headline,
   summary, section, newsroom and age; no button. Updates every 30 minutes (15/30/60).
 - Each profile chooses what it shows (Settings → Top Shelf / Continue Watching, or setup).
 

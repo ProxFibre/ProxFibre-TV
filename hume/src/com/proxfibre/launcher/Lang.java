@@ -490,7 +490,7 @@ public final class Lang {
             "Open in …\u0001Ouvrir dans …\u0001Abrir en …\n" +
             "Not installed\u0001Non installée\u0001No instalada\n" +
             "  ·  Not installed\u0001  ·  Non installée\u0001  ·  No instalada\n" +
-            "Not streaming in India right now.\u0001Non disponible en streaming en Inde pour le moment.\u0001No disponible en streaming en India ahora.\n" +
+            "Not streaming in France right now.\u0001Non disponible en streaming en France pour le moment.\u0001No disponible en streaming en Francia ahora.\n" +
             "Search apps, movies and shows\u0001Rechercher applis, films et séries\u0001Busca apps, películas y series\n" +
             "Listening…\u0001Écoute…\u0001Escuchando…\n" +
             "HOW TO WATCH\u0001COMMENT REGARDER\u0001CÓMO VERLO\n" +
@@ -692,6 +692,9 @@ public final class Lang {
             "Server\u0001Serveur\u0001Servidor\n" +
             "Account\u0001Compte\u0001Cuenta\n" +
             "Show on Home\u0001Afficher sur l'accueil\u0001Mostrar en inicio\n" +
+            "Top shelf shows\u0001Le top shelf affiche\u0001El top shelf muestra\n" +
+            "Continue Watching & Recently added\u0001Reprendre et Récemment ajouté\u0001Seguir viendo y Agregado recientemente\n" +
+            "Recently added\u0001Récemment ajouté\u0001Agregado recientemente\n" +
             "Client app\u0001Appli de lecture\u0001App de reproducción\n" +
             "Disconnect\u0001Déconnecter\u0001Desconectar\n" +
             "Connect\u0001Connecter\u0001Conectar\n" +

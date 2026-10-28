@@ -28,10 +28,13 @@ import java.util.UUID;
 final class Jellyfin {
     static final String PREFS = "jellyfin";
     static final String K_SERVER = "server", K_TOKEN = "token", K_USERID = "user_id",
-            K_USER = "user", K_DEVICE = "device_id", K_ENABLED = "enabled";
+            K_USER = "user", K_DEVICE = "device_id", K_ENABLED = "enabled", K_SHELFMODE = "shelf_mode";
 
     /** Suggestion items coming from the library carry this provider id instead of a service id. */
     static final int ID = -3;
+
+    /** What Jellyfin's own top shelf shows, when its dock app is focused. */
+    static final String MODE_BOTH = "both", MODE_RESUME = "resume", MODE_LATEST = "latest";
 
     private Jellyfin() {
     }
@@ -90,6 +93,22 @@ final class Jellyfin {
     static boolean clientInstalled(Context c) {
         for (String[] cl : CLIENTS) if (Suggestions.installed(c, cl[0])) return true;
         return false;
+    }
+
+    /** Whether pkg is one of the Jellyfin/Emby clients (for the per-app top shelf, dock focus). */
+    static boolean isClient(String pkg) {
+        for (String[] cl : CLIENTS) if (cl[0].equals(pkg)) return true;
+        return false;
+    }
+
+    /** What its own top shelf shows: Continue Watching, Recently added, or both (default). */
+    static String shelfMode(Context c) {
+        return prefs(c).getString(K_SHELFMODE, MODE_BOTH);
+    }
+
+    static void setShelfMode(Context c, String mode) {
+        prefs(c).edit().putString(K_SHELFMODE, mode).apply();
+        Suggestions.changed(c);
     }
 
     /** One line for Settings: the server, or how to set it up. */
@@ -204,31 +223,72 @@ final class Jellyfin {
 
     /** Continue watching and recently added, as carousel items (blocking). */
     static List<Suggestions.Item> items(Context c) throws Exception {
+        return items(c, MODE_BOTH);
+    }
+
+    /** Same, limited to one half when mode asks for it (the app's own dedicated top shelf). */
+    static List<Suggestions.Item> items(Context c, String mode) throws Exception {
         if (!configured(c)) return new ArrayList<>();
         List<Suggestions.Item> out = new ArrayList<>();
         String uid = URLEncoder.encode(userId(c), "UTF-8");
-        try {
-            JSONObject res = get(c, "/Users/" + uid + "/Items/Resume?Limit=10&MediaTypes=Video"
-                    + "&Fields=" + FIELDS + "&ImageTypeLimit=1&EnableImageTypes=Backdrop");
-            addAll(c, res.optJSONArray("Items"), out);
-        } catch (Exception e) {
-            android.util.Log.w("TvHome", "Jellyfin resume: " + e);
-        }
-        try {
-            JSONObject res = get(c, "/Users/" + uid + "/Items/Latest?Limit=6&Fields=" + FIELDS
-                    + "&ImageTypeLimit=1&EnableImageTypes=Backdrop");
-            JSONArray latest = res.optJSONArray("Items");
-            List<Suggestions.Item> added = new ArrayList<>();
-            addAll(c, latest, added);
-            for (Suggestions.Item it : added) {
-                boolean seen = false;
-                for (Suggestions.Item have : out) if (have.link.equals(it.link)) seen = true;
-                if (!seen) out.add(it);
+        if (!mode.equals(MODE_LATEST)) {
+            try {
+                JSONObject res = get(c, "/Users/" + uid + "/Items/Resume?Limit=10&MediaTypes=Video"
+                        + "&Fields=" + FIELDS + "&ImageTypeLimit=1&EnableImageTypes=Backdrop");
+                addAll(c, res.optJSONArray("Items"), out);
+            } catch (Exception e) {
+                android.util.Log.w("TvHome", "Jellyfin resume: " + e);
             }
-        } catch (Exception e) {
-            android.util.Log.w("TvHome", "Jellyfin latest: " + e);
+        }
+        if (!mode.equals(MODE_RESUME)) {
+            try {
+                JSONObject res = get(c, "/Users/" + uid + "/Items/Latest?Limit=6&Fields=" + FIELDS
+                        + "&ImageTypeLimit=1&EnableImageTypes=Backdrop");
+                JSONArray latest = res.optJSONArray("Items");
+                List<Suggestions.Item> added = new ArrayList<>();
+                addAll(c, latest, added);
+                for (Suggestions.Item it : added) {
+                    boolean seen = false;
+                    for (Suggestions.Item have : out) if (have.link.equals(it.link)) seen = true;
+                    if (!seen) out.add(it);
+                }
+            } catch (Exception e) {
+                android.util.Log.w("TvHome", "Jellyfin latest: " + e);
+            }
         }
         return out;
+    }
+
+    static java.io.File shelfCacheFile(Context c) {
+        return new java.io.File(c.getFilesDir(), "jellyfin_shelf.json");
+    }
+
+    /** Cached dedicated shelf (null when missing/stale). */
+    static List<Suggestions.Item> shelfCached(Context c, boolean allowStale) {
+        java.io.File f = shelfCacheFile(c);
+        if (!f.exists()) return null;
+        if (!allowStale && System.currentTimeMillis() - f.lastModified() > Suggestions.MAX_AGE_MS) return null;
+        try {
+            JSONArray a = new JSONArray(new String(Suggestions.readAll(new java.io.FileInputStream(f)),
+                    StandardCharsets.UTF_8));
+            List<Suggestions.Item> out = new ArrayList<>();
+            for (int i = 0; i < a.length(); i++) out.add(Suggestions.Item.fromJson(a.getJSONObject(i)));
+            return out.isEmpty() ? null : out;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    static void writeShelfCache(Context c, List<Suggestions.Item> items) {
+        try {
+            JSONArray a = new JSONArray();
+            for (Suggestions.Item it : items) a.put(it.toJson());
+            try (OutputStream os = new java.io.FileOutputStream(shelfCacheFile(c))) {
+                os.write(a.toString().getBytes(StandardCharsets.UTF_8));
+            }
+        } catch (Exception e) {
+            android.util.Log.w("TvHome", "jellyfin shelf cache: " + e);
+        }
     }
 
     private static void addAll(Context c, JSONArray arr, List<Suggestions.Item> out) {

@@ -667,6 +667,22 @@ public class SettingsActivity extends Activity {
             Jellyfin.setEnabled(this, !Jellyfin.enabled(this));
             refreshAll();
         });
+        row("Top shelf shows", () -> {
+            switch (Jellyfin.shelfMode(this)) {
+                case Jellyfin.MODE_RESUME: return "Continue Watching";
+                case Jellyfin.MODE_LATEST: return "Recently added";
+                default: return "Continue Watching & Recently added";
+            }
+        }, () -> {
+            String[] keys = {Jellyfin.MODE_BOTH, Jellyfin.MODE_RESUME, Jellyfin.MODE_LATEST};
+            String[] names = {"Continue Watching & Recently added", "Continue Watching", "Recently added"};
+            int sel = Math.max(0, java.util.Arrays.asList(keys).indexOf(Jellyfin.shelfMode(this)));
+            dialog("Top shelf shows").setSingleChoiceItems(names, sel, (d, w) -> {
+                Jellyfin.setShelfMode(this, keys[w]);
+                d.dismiss();
+                show(JELLYFIN);
+            }).show();
+        });
         row("Client app", () -> Jellyfin.clientName(this)
                 + (Jellyfin.clientInstalled(this) ? "" : "  \u00b7  " + Lang.t("not installed")), () -> {
             String pkg = Jellyfin.clientPackage(this);
