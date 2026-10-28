@@ -234,10 +234,13 @@ public class MainActivity extends Activity {
         wallPrefetch = new java.util.concurrent.FutureTask<>(() -> makeWallpaper(wall));
         wallPrefetchStyle = wall;
         new Thread((Runnable) wallPrefetch, "hume-wallpaper").start();
-        // After an update that changes what the top shelf holds, start from a fresh carousel.
-        if (Suggestions.prefs(this).getInt("cache_format", 0) != 5) {
+        // After an update that changes what the top shelf holds, start from a fresh carousel; the
+        // per-app shelf's cached banners (curated art, app icons) are regenerated the same way, so
+        // an updated bundled image or icon isn't stuck behind an old cached render.
+        if (Suggestions.prefs(this).getInt("cache_format", 0) != 6) {
             Suggestions.changed(this);
-            Suggestions.prefs(this).edit().putInt("cache_format", 5).apply();
+            deleteRecursive(new java.io.File(getCacheDir(), "appshelf"));
+            Suggestions.prefs(this).edit().putInt("cache_format", 6).apply();
         }
         buildChrome();
         try {
@@ -368,7 +371,6 @@ public class MainActivity extends Activity {
         }
         // Bundled apps: continue an install the user was in the middle of, and offer them once.
         Bundled.resume(this);
-        AppCatalog.resume(this);
         handler.removeCallbacks(bundledTick);
         handler.postDelayed(bundledTick, 1800);
         // Screensaver: ProxFibre never holds the screen on unless the user turned the screensaver off here.
@@ -2854,10 +2856,20 @@ public class MainActivity extends Activity {
         }
     }
 
+    static void deleteRecursive(java.io.File f) {
+        java.io.File[] kids = f.listFiles();
+        if (kids != null) for (java.io.File c : kids) deleteRecursive(c);
+        f.delete();
+    }
+
     /** Known bundled apps whose real tvOS Top Shelf artwork ships with Hume (high-res, no upscale). */
     static final java.util.Map<String, Integer> CURATED_TOPSHELF = new java.util.HashMap<>();
     static {
         CURATED_TOPSHELF.put(Bundled.ARMADILLO, R.drawable.topshelf_armadillo);
+        // Inputs and Presentation are Hume's own synthetic dock entries (AppEntry.pkg = our own
+        // package, there being no real app behind them): ProxFibre's own brand art, not an icon.
+        CURATED_TOPSHELF.put("com.proxfibre.launcher", R.drawable.topshelf_proxfibre);
+        CURATED_TOPSHELF.put("com.google.android.youtube.tv", R.drawable.topshelf_youtube);
     }
 
     /**

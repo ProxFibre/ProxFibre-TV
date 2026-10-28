@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -187,20 +186,13 @@ final class Update {
         }, "hume-update-check").start();
     }
 
-    /** Downloads the release APK, then hands it to the system installer. */
+    /**
+     * Downloads the release APK, then hands it to the system installer, which asks for the
+     * "install unknown apps" permission itself when it's missing rather than us pre-checking it:
+     * on at least one real TV (TCL) that check, and its own Settings screen, stayed stuck on "not
+     * allowed" after the toggle was switched on — a bug in that screen, not the real permission.
+     */
     static void install(final Activity a, final String url) {
-        if (!Bundled.canInstall(a)) {
-            Toast.makeText(a, Lang.s("Allow ProxFibre to install apps first (Settings → Apps)",
-                    "Autorisez d'abord ProxFibre à installer des applis (Réglages → Applis)",
-                    "Permite primero a ProxFibre instalar apps (Ajustes → Apps)"), Toast.LENGTH_LONG).show();
-            try {
-                a.startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        Uri.parse("package:" + a.getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            } catch (Exception ignored) {
-                // no such screen on this TV: the user can find it in the TV settings
-            }
-            return;
-        }
         Toast.makeText(a, Lang.s("Downloading the update…", "Téléchargement de la mise à jour…",
                 "Descargando la actualización…"), Toast.LENGTH_SHORT).show();
         new Thread(() -> {

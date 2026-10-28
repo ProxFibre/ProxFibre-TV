@@ -136,7 +136,6 @@ public class SettingsActivity extends Activity {
         // A permission (install unknown apps, location…) may have just been granted on a system
         // screen: continue any install that was waiting for it, then refresh what it shows.
         Bundled.resume(this);
-        AppCatalog.resume(this);
         refreshAll();
     }
 

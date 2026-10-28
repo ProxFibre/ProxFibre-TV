@@ -1,11 +1,9 @@
 package com.proxfibre.launcher;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -52,7 +50,7 @@ final class AppCatalog {
     };
 
     private static final String PREFS = "app_catalog";
-    private static final String K_CUSTOM = "custom", K_PENDING = "pending";
+    private static final String K_CUSTOM = "custom";
 
     private static SharedPreferences prefs(Context c) {
         return c.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
@@ -124,14 +122,14 @@ final class AppCatalog {
         return e.pkg != null && Suggestions.installed(c, e.pkg) ? "Installed" : "Install…";
     }
 
-    /** Settings row action: resolve the APK (GitHub release or direct link) and install it. */
+    /**
+     * Settings row action: resolve the APK (GitHub release or direct link) and install it. Goes
+     * straight to the system installer rather than pre-checking canRequestPackageInstalls(): on at
+     * least one real TV (a TCL box) that check, and its own "Install unknown apps" screen, stayed
+     * stuck on "not allowed" after the toggle was switched on — a bug in that screen, not in the
+     * actual permission. The system installer's own prompt grants it correctly when it's missing.
+     */
     static void install(final Activity a, final Entry e) {
-        if (!Bundled.canInstall(a)) {
-            prefs(a).edit().putString(K_PENDING, e.id).apply();
-            askPermission(a);
-            return;
-        }
-        prefs(a).edit().remove(K_PENDING).apply();
         Toast.makeText(a, Lang.t("Preparing ") + e.name + "…", Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             try {
@@ -196,36 +194,4 @@ final class AppCatalog {
         }
     }
 
-    private static void askPermission(final Activity a) {
-        new AlertDialog.Builder(a, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                .setTitle(Lang.t("Allow installs"))
-                .setMessage(Lang.s("Android must allow ProxFibre to install apps. Turn on \"Install unknown apps\" for ProxFibre, then come back here: the install resumes on its own.",
-                        "Android doit autoriser ProxFibre à installer des applis. Activez « Installer des applis inconnues » pour ProxFibre, puis revenez ici : l'installation reprend toute seule.",
-                        "Android debe permitir a ProxFibre instalar apps. Activa «Instalar apps desconocidas» para ProxFibre y vuelve aquí: la instalación continúa sola."))
-                .setPositiveButton(Lang.t("Open settings"), (d, w) -> {
-                    try {
-                        a.startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                                Uri.parse("package:" + a.getPackageName()))
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                    } catch (Throwable ignored) {
-                        try {
-                            a.startActivity(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                        } catch (Throwable ignored2) {
-                        }
-                    }
-                })
-                .setNegativeButton(Lang.t("Cancel"), (d, w) -> prefs(a).edit().remove(K_PENDING).apply())
-                .show();
-    }
-
-    /** Called when Settings resumes: finishes an install left waiting for the install permission. */
-    static void resume(Activity a) {
-        String pending = prefs(a).getString(K_PENDING, null);
-        if (pending == null) return;
-        if (!Bundled.canInstall(a)) return;
-        Entry e = find(a, pending);
-        prefs(a).edit().remove(K_PENDING).apply();
-        if (e != null) install(a, e);
-    }
 }

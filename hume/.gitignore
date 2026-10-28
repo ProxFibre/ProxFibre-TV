@@ -3,6 +3,7 @@ signing.keystore
 debug.keystore
 *.jks
 keystore-password.txt
+.env
 ProxFibre.apk
 shots-tmp/
 .DS_Store

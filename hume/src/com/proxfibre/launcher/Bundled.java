@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 
 import java.io.File;
 
@@ -106,8 +105,8 @@ final class Bundled {
             prefs(a).edit().putInt("pending", -1).apply();
             installNext(a, pending + 1);
         }
-        // Still installing, or waiting on the "install unknown apps" permission: AppCatalog.resume()
-        // (called alongside this) picks that part up on its own once it's granted.
+        // Still installing (AppCatalog.install() goes straight to the system installer now, so
+        // there's no pending permission step to pick back up here).
     }
 
     static void installNext(Activity a, int from) {
@@ -119,17 +118,5 @@ final class Bundled {
         prefs(a).edit().putInt("pending", i).apply();
         AppCatalog.Entry e = AppCatalog.findBuiltin(APPS[i][0]);
         if (e != null) AppCatalog.install(a, e);
-    }
-
-    static boolean canInstall(Context c) {
-        if (Build.VERSION.SDK_INT < 26) return true;
-        try {
-            android.app.AppOpsManager aom = (android.app.AppOpsManager) c.getSystemService(Context.APP_OPS_SERVICE);
-            return aom.checkOpNoThrow("android:request_install_packages",
-                    android.os.Process.myUid(), c.getPackageName())
-                    == android.app.AppOpsManager.MODE_ALLOWED;
-        } catch (Throwable t) {
-            return c.getPackageManager().canRequestPackageInstalls();
-        }
     }
 }

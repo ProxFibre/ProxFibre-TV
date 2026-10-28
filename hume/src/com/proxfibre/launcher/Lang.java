@@ -640,8 +640,6 @@ public final class Lang {
             "Install Armadillo and AirPlay?\u0001Installer Armadillo et AirPlay ?\u0001¿Instalar Armadillo y AirPlay?\n" +
             "Install\u0001Installer\u0001Instalar\n" +
             "Later\u0001Plus tard\u0001Más tarde\n" +
-            "Allow installs\u0001Autoriser les installations\u0001Permitir instalaciones\n" +
-            "Open settings\u0001Ouvrir les réglages\u0001Abrir ajustes\n" +
             "No installer available on this TV\u0001Aucun installeur sur cette TV\u0001No hay instalador en este TV\n" +
             // --- permissions
             "Turn on Power Off\u0001Activer Éteindre\u0001Activar Apagar\n" +
