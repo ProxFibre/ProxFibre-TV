@@ -2870,6 +2870,10 @@ public class MainActivity extends Activity {
         // package, there being no real app behind them): ProxFibre's own brand art, not an icon.
         CURATED_TOPSHELF.put("com.proxfibre.launcher", R.drawable.topshelf_proxfibre);
         CURATED_TOPSHELF.put("com.google.android.youtube.tv", R.drawable.topshelf_youtube);
+        // Moonfin's own logo (from its GitHub repo, GPL-2.0), shown while Jellyfin isn't
+        // connected; once it is, hasAppShelf() routes Moonfin to its own dynamic shelf instead.
+        CURATED_TOPSHELF.put("org.moonfin.androidtv", R.drawable.topshelf_moonfin);
+        CURATED_TOPSHELF.put("com.github.damontecres.wholphin", R.drawable.topshelf_wholphin);
     }
 
     /**

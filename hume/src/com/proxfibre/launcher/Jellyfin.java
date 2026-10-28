@@ -45,6 +45,7 @@ final class Jellyfin {
             {"org.jellyfin.androidtv", "Jellyfin"},
             {"com.fredrikburmester.streamyfin", "Streamyfin"},
             {"dev.jdtech.jellyfin", "Findroid"},
+            {"com.github.damontecres.wholphin", "Wholphin"},
             {"org.jellyfin.mobile", "Jellyfin"},
     };
 
